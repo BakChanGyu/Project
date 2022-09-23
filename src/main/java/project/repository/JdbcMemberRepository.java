@@ -1,9 +1,11 @@
 package project.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 import project.member.Member;
+import project.missing.MissingMember;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
+@Qualifier("JdbcMemberRepository")
 public class JdbcMemberRepository implements MemberRepository {
 
     private final DataSource dataSource;
@@ -20,7 +23,7 @@ public class JdbcMemberRepository implements MemberRepository {
     @Override
     public Member save(Member member) {
 
-        String sql = "insert into member(id, loginId, name, password) values(?, ?, ?, ?)";
+        String sql = "insert into officer(id, loginId, name, password) values(?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -46,9 +49,14 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
+    public MissingMember save(MissingMember member) {
+        return null;
+    }
+
+    @Override
     public Optional<Member> findById(Long id) {
 
-        String sql = "select * from member where id = ?";
+        String sql = "select * from officer where id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -83,7 +91,7 @@ public class JdbcMemberRepository implements MemberRepository {
     @Override
     public Optional<Member> findLoginId(String loginId) {
 
-        String sql = "select * from member where loginId = ?";
+        String sql = "select * from officer where loginId = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -115,45 +123,60 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
-    public List<Member> findAll() {
+    public List<MissingMember> findAll() {
+        return null;
+    }
 
-        String sql = "select * from member";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            List<Member> members = new ArrayList<>();
-
-            while(rs.next()) {
-                Member member = new Member();
-                member.setId(rs.getLong("id"));
-                member.setLoginId(rs.getString("loginId"));
-                member.setName(rs.getString("name"));
-                member.setPassword(rs.getString("password"));
-                members.add(member);
-            }
-
-            return members;
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            close(conn, pstmt, rs);
-        }
+    @Override
+    public void delete(MissingMember member) {
 
     }
+
+    @Override
+    public MissingMember updateByMissingcode(MissingMember member) {
+        return null;
+    }
+
+//    @Override
+//    public List<Member> findAll() {
+//
+//        String sql = "select * from member";
+//
+//        Connection conn = null;
+//        PreparedStatement pstmt = null;
+//        ResultSet rs = null;
+//
+//
+//        try {
+//            conn = getConnection();
+//            pstmt = conn.prepareStatement(sql);
+//            rs = pstmt.executeQuery();
+//
+//            List<Member> members = new ArrayList<>();
+//
+//            while(rs.next()) {
+//                Member member = new Member();
+//                member.setId(rs.getLong("id"));
+//                member.setLoginId(rs.getString("loginId"));
+//                member.setName(rs.getString("name"));
+//                member.setPassword(rs.getString("password"));
+//                members.add(member);
+//            }
+//
+//            return members;
+//        } catch (SQLException e) {
+//            throw new IllegalStateException(e);
+//        } finally {
+//            close(conn, pstmt, rs);
+//        }
+//
+//    }
 
     // 아이디 중복체크
     @Override
     public int countId(Long id) {
 
-        String sql = "select count(*) from member where id = ?";
+        String sql = "select count(*) from officer where id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -182,7 +205,7 @@ public class JdbcMemberRepository implements MemberRepository {
     @Override
     public int countLoginID(String loginId) {
 
-        String sql = "select count(*) from member where loginId = ?";
+        String sql = "select count(*) from officer where loginId = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;

@@ -2,6 +2,7 @@ package project.repository;
 
 import org.springframework.stereotype.Repository;
 import project.member.Member;
+import project.missing.MissingMember;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +11,12 @@ import java.util.Optional;
 public interface MemberRepository {
 
     Member save(Member member);
+    MissingMember save(MissingMember member);
     Optional<Member> findById(Long id);
     Optional<Member> findLoginId(String loginId);
-    List<Member> findAll();
+    List<MissingMember> findAll();
+    void delete(MissingMember member);
+    MissingMember updateByMissingcode(MissingMember member);
 
     int countId(Long id);
     int countLoginID(String loginId);

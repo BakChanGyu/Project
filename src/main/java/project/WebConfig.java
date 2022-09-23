@@ -1,10 +1,13 @@
 package project;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import project.interceptor.LogInterceptor;
 import project.interceptor.LoginCheckInterceptor;
+import project.missing.MissingService;
+import project.repository.MemberRepository;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -19,6 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LoginCheckInterceptor())
                 .order(2)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/", "/api/add", "/api/login", "/api/logout", "/css/**", "/*.ico", "/error");
+                .excludePathPatterns("/**");
+//                .excludePathPatterns("/api", "/api/add", "/api/login", "/api/logout", "/css/**", "/*.ico", "/error");
     }
+
 }

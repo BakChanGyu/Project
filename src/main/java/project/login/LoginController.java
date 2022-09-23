@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import project.member.Member;
 
@@ -70,7 +69,6 @@ public class LoginController {
      * TODO list
      * 인공지능 -> 파이썬코드를 자바에서 돌리기
      * 필적입력 데이터 받기. -> 이미지 받아와서 인공지능 모델에 input.
-     * 노인정보 가져오기 (findById)
      * 시간남을때 -> 로그인 vaild(글자제한 등) -> 리액트에서 처리하는 방법 찾아야.
      */
 
