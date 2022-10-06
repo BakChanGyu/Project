@@ -40,6 +40,12 @@ public class LoginController {
         }
 
         // 로그인 성공 처리
+        Member verifyCode = loginService.verifyCode(form.getLoginId());
+        log.info("verifyCode ={}", verifyCode);
+        if (verifyCode == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
         // 세션이 있으면 반환, 없으면 신규 생성
         HttpSession session = request.getSession(true);
         // 세션에 로그인 정보 보관

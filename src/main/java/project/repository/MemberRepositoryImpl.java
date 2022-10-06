@@ -9,21 +9,20 @@ import project.missing.MissingMember;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-@Qualifier("JdbcMemberRepository")
-public class JdbcMemberRepository implements MemberRepository {
+@Qualifier("MemberRepositoryImpl")
+public class MemberRepositoryImpl implements MemberRepository {
 
     private final DataSource dataSource;
 
     @Override
     public Member save(Member member) {
 
-        String sql = "insert into officer(id, loginId, name, password) values(?, ?, ?, ?)";
+        String sql = "insert into officer(id, loginId, name, password, email) values(?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -37,6 +36,7 @@ public class JdbcMemberRepository implements MemberRepository {
             pstmt.setString(2, member.getLoginId());
             pstmt.setString(3, member.getName());
             pstmt.setString(4, member.getPassword());
+            pstmt.setString(5, member.getEmail());
 
             pstmt.executeUpdate();
 
@@ -110,6 +110,8 @@ public class JdbcMemberRepository implements MemberRepository {
                 member.setLoginId(rs.getString("loginId"));
                 member.setPassword(rs.getString("password"));
                 member.setName(rs.getString("name"));
+                member.setEmail(rs.getString("email"));
+                member.setPrivateKey(rs.getString("private_key"));
                 return Optional.of(member);
             } else {
                 return Optional.empty();
@@ -230,6 +232,59 @@ public class JdbcMemberRepository implements MemberRepository {
         }
     }
 
+    // 이메일 인증코드발송
+    public void addPrivateKey(Long id, String code) {
+
+        String sql = "update officer set private_key = ? where id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, code);
+            pstmt.setLong(2, id);
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    // id를 key값으로 인증코드를 가져옴
+    public String findPrivateKeyById(Long id) {
+
+        String sql = "select private_key from officer where id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setLong(1, id);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("private_key");
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
     private Connection getConnection() {
         return DataSourceUtils.getConnection(dataSource);
     }
@@ -259,7 +314,7 @@ public class JdbcMemberRepository implements MemberRepository {
         }
     }
 
-    private void close(Connection conn) throws SQLException{
+    private void close(Connection conn) throws SQLException {
         DataSourceUtils.releaseConnection(conn, dataSource);
     }
 }

@@ -8,7 +8,4 @@ import project.repository.MemberRepository;
 @RequiredArgsConstructor
 public class AIService {
 
-//    private final MemberRepository memberRepository;
-
-    // TODO 인공지능 서비스
 }

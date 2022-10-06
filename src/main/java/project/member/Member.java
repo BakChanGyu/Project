@@ -1,7 +1,6 @@
 package project.member;
 
 import lombok.Data;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -16,4 +15,8 @@ public class Member {
     private String password; // 비밀번호
     @NotEmpty
     private String name; // 사용자 이름
+    @NotEmpty
+    private String email; // 이메일
+    @NotEmpty
+    private String privateKey; // 이메일 인증키
 }

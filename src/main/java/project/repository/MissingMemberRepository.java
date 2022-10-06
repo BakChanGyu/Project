@@ -78,7 +78,6 @@ public class MissingMemberRepository implements MemberRepository{
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
-
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
@@ -88,7 +87,16 @@ public class MissingMemberRepository implements MemberRepository{
 
             while(rs.next()) {
                 MissingMember member = new MissingMember();
+                member.setMisscode(rs.getString("misscode"));
                 member.setName(rs.getString("name"));
+                member.setAddress(rs.getString("address"));
+                member.setSsn(rs.getString("ssn"));
+                member.setFound_date(rs.getDate("found_date"));
+                member.setFound_loc(rs.getString("found_loc"));
+                member.setProtector_name(rs.getString("protector_name"));
+                member.setProtector_tel(rs.getString("protector_tel"));
+                member.setOfficer_id(rs.getLong("officer_id"));
+
                 members.add(member);
             }
 
