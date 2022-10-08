@@ -1,11 +1,9 @@
 package project.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
-import project.member.Member;
-import project.missing.MissingMember;
+import project.identification.IdentificationTarget;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -14,23 +12,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-@Qualifier("MissingMemberRepository")
-public class MissingMemberRepository implements MemberRepository{
+public class IdentificationRepositoryImpl implements IdentificationRepository {
 
     private final DataSource dataSource;
 
     @Override
-    public Member save(Member member) {
-        return null;
-    }
-
-    @Override
-    public MissingMember save(MissingMember member) {
-        String sql = "insert into missing_list(misscode, name, address, ssn, found_date, found_loc, protector_name, protector_tel, officer_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public IdentificationTarget save(IdentificationTarget member) {
+        String sql = "insert into identification_target(id_code, name, rgst_date, member_id) values(?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -40,15 +31,10 @@ public class MissingMemberRepository implements MemberRepository{
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, member.getMisscode());
+            pstmt.setString(1, member.getIdCode());
             pstmt.setString(2, member.getName());
-            pstmt.setString(3, member.getAddress());
-            pstmt.setString(4, member.getSsn());
-            pstmt.setDate(5, member.getFound_date());
-            pstmt.setString(6, member.getFound_loc());
-            pstmt.setString(7, member.getProtector_name());
-            pstmt.setString(8, member.getProtector_tel());
-            pstmt.setLong(9, member.getOfficer_id());
+            pstmt.setDate(3, member.getRgstDate());
+            pstmt.setLong(4, member.getMemberId());
 
             pstmt.executeUpdate();
 
@@ -61,18 +47,8 @@ public class MissingMemberRepository implements MemberRepository{
     }
 
     @Override
-    public Optional<Member> findById(Long id) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Member> findLoginId(String loginId) {
-        return Optional.empty();
-    }
-
-    @Override
-    public List<MissingMember> findAll() {
-        String sql = "select * from missing_list";
+    public List<IdentificationTarget> findAll() {
+        String sql = "select * from identification_target";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -83,19 +59,14 @@ public class MissingMemberRepository implements MemberRepository{
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
-            List<MissingMember> members = new ArrayList<>();
+            List<IdentificationTarget> members = new ArrayList<>();
 
             while(rs.next()) {
-                MissingMember member = new MissingMember();
-                member.setMisscode(rs.getString("misscode"));
+                IdentificationTarget member = new IdentificationTarget();
+                member.setIdCode(rs.getString("id_code"));
                 member.setName(rs.getString("name"));
-                member.setAddress(rs.getString("address"));
-                member.setSsn(rs.getString("ssn"));
-                member.setFound_date(rs.getDate("found_date"));
-                member.setFound_loc(rs.getString("found_loc"));
-                member.setProtector_name(rs.getString("protector_name"));
-                member.setProtector_tel(rs.getString("protector_tel"));
-                member.setOfficer_id(rs.getLong("officer_id"));
+                member.setRgstDate(rs.getDate("rgst_date"));
+                member.setMemberId(rs.getLong("member_id"));
 
                 members.add(member);
             }
@@ -119,8 +90,8 @@ public class MissingMemberRepository implements MemberRepository{
     }
 
     @Override
-    public void delete(MissingMember member) {
-        String sql = "delete from missing_list where misscode = ?";
+    public void delete(IdentificationTarget member) {
+        String sql = "delete from identification_target where id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -129,7 +100,7 @@ public class MissingMemberRepository implements MemberRepository{
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, member.getMisscode());
+            pstmt.setString(1, member.getIdCode());
             pstmt.execute();
 
         } catch (SQLException e) {
@@ -140,8 +111,8 @@ public class MissingMemberRepository implements MemberRepository{
     }
 
     @Override
-    public MissingMember updateByMissingcode(MissingMember member) {
-        String sql = "update missing_list set name = ?, address = ?, ssn = ?, found_date = ?, found_loc = ?, protector_name = ?, protector_tel = ?, officer_id = ? where misscode = ?";
+    public IdentificationTarget updateByMissingcode(IdentificationTarget member) {
+        String sql = "update identification_target set name = ?, rgst_date = ?, member_id = ? where id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -152,14 +123,9 @@ public class MissingMemberRepository implements MemberRepository{
             pstmt = conn.prepareStatement(sql);
 
             pstmt.setString(1, member.getName());
-            pstmt.setString(2, member.getAddress());
-            pstmt.setString(3, member.getSsn());
-            pstmt.setDate(4, member.getFound_date());
-            pstmt.setString(5, member.getFound_loc());
-            pstmt.setString(6, member.getProtector_name());
-            pstmt.setString(7, member.getProtector_tel());
-            pstmt.setLong(8, member.getOfficer_id());
-            pstmt.setString(9, member.getMisscode());
+            pstmt.setDate(2, member.getRgstDate());
+            pstmt.setLong(3, member.getMemberId());
+            pstmt.setString(4, member.getIdCode());
 
             pstmt.executeUpdate();
 

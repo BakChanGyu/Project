@@ -2,8 +2,6 @@ package project.member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -11,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import project.email.EmailService;
-import project.repository.MemberRepository;
 import project.repository.MemberRepositoryImpl;
 
 
@@ -27,6 +24,7 @@ public class MemberController {
 
     @Async
     @PostMapping("/add")
+    // 회원가입후, 사용자가 입력한 정보반환.
     public ResponseEntity<?> add(@RequestBody Member member,
                       BindingResult bindingResult) throws Exception {
         // 에러가 있는 경우 다시 회원가입 폼으로
@@ -36,7 +34,7 @@ public class MemberController {
         }
 
         // 아이디 중복체크
-        int countId = memberRepository.countId(member.getId());
+        int countId = memberRepository.countId(member.getMemberId());
         int countLoginId = memberRepository.countLoginID(member.getLoginId());
         log.info("countId ={}", countId);
         log.info("countLoginId ={}", countLoginId);
@@ -61,14 +59,14 @@ public class MemberController {
         String code = emailService.sendSimpleMessage(member);
         log.info("code ={}", code);
         // 회원 DB에 인증코드 업데이트
-        memberRepository.addPrivateKey(member.getId(), code);
+        memberRepository.addPrivateKey(member.getMemberId(), code);
 
         return new ResponseEntity<>(member, HttpStatus.CREATED);
     }
 
     // 이메일로 보낸 인증코드가 일치하는지 확인하는 api
     @GetMapping("/verifyCode")
-    public String confirmEmail(@RequestParam Long id, String private_key) {
+    private String confirmEmail(@RequestParam Long id, String private_key) {
 
         // DB에서 id값으로 인증코드 찾아옴
         String serverKey = memberRepository.findPrivateKeyById(id);
@@ -85,16 +83,16 @@ public class MemberController {
         }
     }
 
-    // 로그인하면, 누가 로그인한건지 띄워줌. 마이페이지 느낌으로
-    @PostMapping("/login/{id}")
-    public ResponseEntity<?> showLoginMember(@ModelAttribute Member member, BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            log.info("error ={}", bindingResult);
-            log.info("member ={}", member);
-            return new ResponseEntity<>(member, HttpStatus.BAD_REQUEST);
-        }
-        log.info("member ={}", member);
-        return new ResponseEntity<>(member, HttpStatus.OK);
-    }
+//    // 로그인하면, 누가 로그인한건지 띄워줌. 마이페이지 느낌으로
+//    @PostMapping("/login/{id}")
+//    public ResponseEntity<?> showLoginMember(@ModelAttribute Member member, BindingResult bindingResult) {
+//
+//        if (bindingResult.hasErrors()) {
+//            log.info("error ={}", bindingResult);
+//            log.info("member ={}", member);
+//            return new ResponseEntity<>(member, HttpStatus.BAD_REQUEST);
+//        }
+//        log.info("member ={}", member);
+//        return new ResponseEntity<>(member, HttpStatus.OK);
+//    }
 }

@@ -19,11 +19,6 @@ public class LoginController {
 
     private final LoginService loginService;
 
-    @GetMapping("/login")
-    public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
-        return "login/loginForm";
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginForm form, BindingResult bindingResult,
                         HttpServletRequest request) {
@@ -40,6 +35,7 @@ public class LoginController {
         }
 
         // 로그인 성공 처리
+        // 인증코드 대조하여 "certified"면 로그인 허용
         Member verifyCode = loginService.verifyCode(form.getLoginId());
         log.info("verifyCode ={}", verifyCode);
         if (verifyCode == null) {
@@ -55,8 +51,8 @@ public class LoginController {
         return new ResponseEntity<>(loginMember, HttpStatus.OK);
     }
 
-    @PostMapping("logout")
-    public String logout(HttpServletRequest request) {
+    @GetMapping("logout")
+    public void logout(HttpServletRequest request) {
 
         log.info("request ={}", request);
         // 세션이 없어도 새로 생성X
@@ -67,15 +63,12 @@ public class LoginController {
             log.info("session is invalidated");
         }
         log.info("session ={}", session);
-        return "redirect:/home";
     }
 
 
     /**
-     * TODO list
-     * 인공지능 -> 파이썬코드를 자바에서 돌리기
-     * 필적입력 데이터 받기. -> 이미지 받아와서 인공지능 모델에 input.
-     * 시간남을때 -> 로그인 vaild(글자제한 등) -> 리액트에서 처리하는 방법 찾아야.
+     * TODO list=
+     * 로그인 vaild(글자제한 등) -> 리액트에서 처리하는 방법 찾아야.
      */
 
 

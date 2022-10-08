@@ -1,20 +1,16 @@
 package project.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 import project.member.Member;
-import project.missing.MissingMember;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-@Qualifier("MemberRepositoryImpl")
 public class MemberRepositoryImpl implements MemberRepository {
 
     private final DataSource dataSource;
@@ -22,7 +18,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Member save(Member member) {
 
-        String sql = "insert into officer(id, loginId, name, password, email) values(?, ?, ?, ?, ?)";
+        String sql = "insert into member(member_id, loginId, member_name, password, email, member_type) values(?, ?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -32,11 +28,12 @@ public class MemberRepositoryImpl implements MemberRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setLong(1, member.getId());
+            pstmt.setLong(1, member.getMemberId());
             pstmt.setString(2, member.getLoginId());
-            pstmt.setString(3, member.getName());
+            pstmt.setString(3, member.getMemberName());
             pstmt.setString(4, member.getPassword());
             pstmt.setString(5, member.getEmail());
+            pstmt.setString(6, member.getMemberType());
 
             pstmt.executeUpdate();
 
@@ -49,14 +46,9 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public MissingMember save(MissingMember member) {
-        return null;
-    }
-
-    @Override
     public Optional<Member> findById(Long id) {
 
-        String sql = "select * from officer where id = ?";
+        String sql = "select * from member where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -71,10 +63,13 @@ public class MemberRepositoryImpl implements MemberRepository {
 
             if (rs.next()) {
                 Member member = new Member();
-                member.setId(rs.getLong("id"));
+                member.setMemberId(rs.getLong("member_id"));
                 member.setLoginId(rs.getString("loginId"));
-                member.setName(rs.getString("name"));
+                member.setMemberName(rs.getString("member_name"));
                 member.setPassword(rs.getString("password"));
+                member.setEmail(rs.getString("email"));
+                member.setMemberType(rs.getString("member_type"));
+                member.setPrivateKey(rs.getString("private_key"));
 
                 return Optional.of(member);
             } else {
@@ -91,7 +86,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Optional<Member> findLoginId(String loginId) {
 
-        String sql = "select * from officer where loginId = ?";
+        String sql = "select * from member where loginId = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -106,11 +101,12 @@ public class MemberRepositoryImpl implements MemberRepository {
 
             if (rs.next()) {
                 Member member = new Member();
-                member.setId(rs.getLong("id"));
+                member.setMemberId(rs.getLong("member_id"));
                 member.setLoginId(rs.getString("loginId"));
                 member.setPassword(rs.getString("password"));
-                member.setName(rs.getString("name"));
+                member.setMemberName(rs.getString("member_name"));
                 member.setEmail(rs.getString("email"));
+                member.setMemberType(rs.getString("member_type"));
                 member.setPrivateKey(rs.getString("private_key"));
                 return Optional.of(member);
             } else {
@@ -124,61 +120,11 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
-    @Override
-    public List<MissingMember> findAll() {
-        return null;
-    }
-
-    @Override
-    public void delete(MissingMember member) {
-
-    }
-
-    @Override
-    public MissingMember updateByMissingcode(MissingMember member) {
-        return null;
-    }
-
-//    @Override
-//    public List<Member> findAll() {
-//
-//        String sql = "select * from member";
-//
-//        Connection conn = null;
-//        PreparedStatement pstmt = null;
-//        ResultSet rs = null;
-//
-//
-//        try {
-//            conn = getConnection();
-//            pstmt = conn.prepareStatement(sql);
-//            rs = pstmt.executeQuery();
-//
-//            List<Member> members = new ArrayList<>();
-//
-//            while(rs.next()) {
-//                Member member = new Member();
-//                member.setId(rs.getLong("id"));
-//                member.setLoginId(rs.getString("loginId"));
-//                member.setName(rs.getString("name"));
-//                member.setPassword(rs.getString("password"));
-//                members.add(member);
-//            }
-//
-//            return members;
-//        } catch (SQLException e) {
-//            throw new IllegalStateException(e);
-//        } finally {
-//            close(conn, pstmt, rs);
-//        }
-//
-//    }
-
     // 아이디 중복체크
     @Override
     public int countId(Long id) {
 
-        String sql = "select count(*) from officer where id = ?";
+        String sql = "select count(*) from member where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -207,7 +153,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public int countLoginID(String loginId) {
 
-        String sql = "select count(*) from officer where loginId = ?";
+        String sql = "select count(*) from member where loginId = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -235,7 +181,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     // 이메일 인증코드발송
     public void addPrivateKey(Long id, String code) {
 
-        String sql = "update officer set private_key = ? where id = ?";
+        String sql = "update member set private_key = ? where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -259,7 +205,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     // id를 key값으로 인증코드를 가져옴
     public String findPrivateKeyById(Long id) {
 
-        String sql = "select private_key from officer where id = ?";
+        String sql = "select private_key from member where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;

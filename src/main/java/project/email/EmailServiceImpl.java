@@ -53,12 +53,12 @@ public class EmailServiceImpl implements EmailService{
 
         String msg = "";
         msg += "<div style='margin:100px;'>";
-        msg += "<h2> <strong>" + member.getName() +"</strong> 님 환영합니다!</h2>";
+        msg += "<h2> <strong>" + member.getMemberName() + "</strong> 님 환영합니다!</h2>";
         msg += "<br>";
         msg += "<p>아래 인증 링크를 눌러 회원가입을 완료해주세요!<p>";
         msg += "<br>";
         msg += "<a href='http://localhost:8080"
-                + "/api/verifyCode?id=" + member.getId()
+                + "/api/verifyCode?id=" + member.getMemberId()
                 + "&private_key=" + emailPassword
                 + "'> 인증하기</a>";
         msg += "<br>";
