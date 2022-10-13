@@ -25,6 +25,8 @@ public class AIController {
 
     @Value("${flask.url}")
     private String url;
+    @Value("${delete.dir}")
+    private String dir;
 
     // 인공지능 모델에 들어갈 이미지 받아오기
     @GetMapping("/loadAI")
@@ -83,9 +85,10 @@ public class AIController {
             e.printStackTrace();
         } finally {
             // 사용후파일삭제
-            DeleteFile deleteFile;
-            return jsonObject;
+            DeleteFile deleteFile = new DeleteFile();
+            deleteFile.deleteFile(dir);
         }
+        return jsonObject;
     }
 
     private List<Map.Entry<String, Integer>> showResult(AIResponseDto dto) {
@@ -103,12 +106,7 @@ public class AIController {
         log.info("map ={}", map);
 
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(map.entrySet());
-        entryList.sort(new Comparator<Map.Entry<String, Integer>>() {
-            @Override
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return o2.getValue() - o1.getValue();
-            }
-        });
+        entryList.sort((o1, o2) -> o2.getValue() - o1.getValue());
 
         log.info("entryList ={}", entryList);
 

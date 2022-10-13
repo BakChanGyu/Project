@@ -14,11 +14,13 @@ public class Member {
     @NotEmpty
     private String password; // 비밀번호
     @NotEmpty
+    private String checkPwd; // 비밀번호 확인
+    @NotEmpty
     private String memberName; // 사용자 이름
     @NotEmpty
     private String email; // 이메일
     @NotEmpty
     private String memberType; // 회원의 종류 (police, teacher, others)
-    @NotEmpty
+
     private String privateKey; // 이메일 인증키
 }

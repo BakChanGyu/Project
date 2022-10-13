@@ -20,8 +20,10 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     private final DataSource dataSource;
 
     @Override
-    public IdentificationTarget save(IdentificationTarget member) {
-        String sql = "insert into identification_target(id_code, name, rgst_date, member_id) values(?, ?, ?, ?)";
+    public IdentificationTarget save(IdentificationTarget target) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into identification_target(id_code, name, rgst_date) values(?, ?, ?)");
+
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -29,16 +31,15 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
 
         try {
             conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sb.toString());
 
-            pstmt.setString(1, member.getIdCode());
-            pstmt.setString(2, member.getName());
-            pstmt.setDate(3, member.getRgstDate());
-            pstmt.setLong(4, member.getMemberId());
+            pstmt.setString(1, target.getIdCode());
+            pstmt.setString(2, target.getName());
+            pstmt.setDate(3, target.getRgstDate());
 
             pstmt.executeUpdate();
 
-            return member;
+            return target;
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         } finally {
@@ -90,28 +91,7 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     }
 
     @Override
-    public void delete(IdentificationTarget member) {
-        String sql = "delete from identification_target where id_code = ?";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, member.getIdCode());
-            pstmt.execute();
-
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            close(conn, pstmt, rs);
-        }
-    }
-
-    @Override
-    public IdentificationTarget updateByMissingcode(IdentificationTarget member) {
+    public IdentificationTarget updateTable(IdentificationTarget target) {
         String sql = "update identification_target set name = ?, rgst_date = ?, member_id = ? where id_code = ?";
 
         Connection conn = null;
@@ -122,14 +102,35 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, member.getName());
-            pstmt.setDate(2, member.getRgstDate());
-            pstmt.setLong(3, member.getMemberId());
-            pstmt.setString(4, member.getIdCode());
+            pstmt.setString(1, target.getName());
+            pstmt.setDate(2, target.getRgstDate());
+            pstmt.setLong(3, target.getMemberId());
+            pstmt.setString(4, target.getIdCode());
 
             pstmt.executeUpdate();
 
-            return member;
+            return target;
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public void delete(IdentificationTarget target) {
+        String sql = "delete from identification_target where id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, target.getIdCode());
+            pstmt.execute();
+
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         } finally {

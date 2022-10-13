@@ -17,8 +17,4 @@ public class ItemRepository {
         store.put(item.getItemId(), item);
         return item;
     }
-
-    public Item findById(Long id) {
-        return store.get(id);
-    }
 }

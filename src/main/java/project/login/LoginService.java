@@ -1,18 +1,18 @@
 package project.login;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import project.manager.Manager;
 import project.member.Member;
+import project.repository.ManagerRepository;
 import project.repository.MemberRepository;
-import project.repository.MemberRepositoryImpl;
 
 @Service
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final MemberRepositoryImpl memberRepository;
+    private final MemberRepository memberRepository;
+    private final ManagerRepository managerRepository;
 
     public Member login(String loginId, String password) {
         return memberRepository.findLoginId(loginId)
@@ -24,6 +24,12 @@ public class LoginService {
         return memberRepository.findLoginId(loginId)
                 .filter(member -> member.getPrivateKey()
                 .equals("certified"))
+                .orElse(null);
+    }
+
+    public Manager loginManager(Long id, String managerPwd) {
+        return managerRepository.findById(id)
+                .filter(manager -> manager.getManagerPwd().equals(managerPwd))
                 .orElse(null);
     }
 }

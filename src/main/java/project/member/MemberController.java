@@ -4,38 +4,37 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import project.email.EmailService;
-import project.repository.MemberRepositoryImpl;
+
+import java.util.List;
 
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-@EnableAsync
 public class MemberController {
 
-    private final MemberRepositoryImpl memberRepository;
+    private final MemberService memberService;
     private final EmailService emailService;
 
-    @Async
+    // 회원가입 API
     @PostMapping("/add")
-    // 회원가입후, 사용자가 입력한 정보반환.
     public ResponseEntity<?> add(@RequestBody Member member,
-                      BindingResult bindingResult) throws Exception {
+                                 BindingResult bindingResult,
+                                 Model model) throws Exception {
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
-            log.info("error ={}", bindingResult);
+            log.error("error ={}", bindingResult);
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
 
         // 아이디 중복체크
-        int countId = memberRepository.countId(member.getMemberId());
-        int countLoginId = memberRepository.countLoginID(member.getLoginId());
+        int countId = memberService.countId(member);
+        int countLoginId = memberService.countLoginId(member);
         log.info("countId ={}", countId);
         log.info("countLoginId ={}", countLoginId);
 
@@ -51,36 +50,42 @@ public class MemberController {
             log.info("loginId 중복. 회원가입실패");
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
+        // 비밀번호 확인과 일치하지 않으면 에러
+        String password = member.getPassword();
+        String checkPwd = member.getCheckPwd();
+        if (!password.equals(checkPwd)) {
+            log.info("비밀번호 불일치. password ={}, checkPwd ={}", password, checkPwd);
+            model.addAttribute("error", "비밀번호와 동일하게 입력해주세요");
+            return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
+        }
 
-        memberRepository.save(member);
+        memberService.addMember(member);
         log.info("회원가입완료 member ={} ", member);
 
-        // 이메일 발송후 인증코드 반환
-        String code = emailService.sendSimpleMessage(member);
-        log.info("code ={}", code);
-        // 회원 DB에 인증코드 업데이트
-        memberRepository.addPrivateKey(member.getMemberId(), code);
+        // 이메일로 인증코드 발송
+        emailService.sendSimpleMessage(member);
+        log.info("인증코드 전송 완료");
 
         return new ResponseEntity<>(member, HttpStatus.CREATED);
     }
 
-    // 이메일로 보낸 인증코드가 일치하는지 확인하는 api
-    @GetMapping("/verifyCode")
-    private String confirmEmail(@RequestParam Long id, String private_key) {
+    @GetMapping("/member_list")
+    public ResponseEntity<?> list() {
+        List<Member> members = memberService.findMembers();
 
-        // DB에서 id값으로 인증코드 찾아옴
-        String serverKey = memberRepository.findPrivateKeyById(id);
-        log.info("serverKey ={}", serverKey);
-        log.info("userKey ={}", private_key);
-        // 서버의 인증코드와 사용자의 인증코드가 일치할 경우 DB의 private_key값 certified로 변경
-        // 이후 로그인할때 private_key값이 certified인지 아닌지 확인.
-        if (serverKey.equals(private_key)) {
-            memberRepository.addPrivateKey(id, "certified");
-
-            return "인증에 성공했습니다!";
-        } else {
-            return "인증에 실패했습니다. 다시 시도해주세요.";
+        // 리스트 조회 실패시, 에러반환
+        if (members == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        // 리스트 조회 성공시, 리스트 반환
+        log.info("missingMembers ={}", members);
+        return new ResponseEntity<>(members, HttpStatus.OK);
+    }
+
+    @GetMapping("/delete")
+    public void delete(Long memberId) {
+        memberService.deleteMember(memberId);
     }
 
 //    // 로그인하면, 누가 로그인한건지 띄워줌. 마이페이지 느낌으로

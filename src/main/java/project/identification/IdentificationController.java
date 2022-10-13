@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import project.repository.IdentificationRepository;
 
 import java.util.List;
 
@@ -17,56 +16,59 @@ import java.util.List;
 public class IdentificationController {
 
     private final IdentificationService identificationService;
-    private final IdentificationRepository memberRepository;
 
-    @GetMapping("/list")
+    @GetMapping("/idntf_list")
     public ResponseEntity<?> list() {
 
         // 신원확인대상 리스트 반환
-        List<IdentificationTarget> identificationTarget = identificationService.list();
+        List<IdentificationTarget> identificationTargets = identificationService.list();
 
         // 리스트 조회 실패시, 에러반환
-        if (identificationTarget == null) {
+        if (identificationTargets == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         // 리스트 조회 성공시 listMember 반환
-        log.info("missingMember={}", identificationTarget);
-        return new ResponseEntity<>(identificationTarget, HttpStatus.OK);
+        log.info("identificationTargets ={}", identificationTargets);
+        return new ResponseEntity<>(identificationTargets, HttpStatus.OK);
     }
 
     @PostMapping("/idntf_add")
-    public ResponseEntity<?> add(@RequestBody IdentificationTarget member, BindingResult bindingResult) {
+    public ResponseEntity<?> add(@RequestBody IdentificationTarget target, BindingResult bindingResult) {
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
-        memberRepository.save(member);
-        log.info("회원가입완료 member={}", member);
-        return new ResponseEntity<>(member, HttpStatus.CREATED);
+
+        identificationService.save(target);
+        log.info("신원확인대상 등록 완료 target ={}", target);
+
+        return new ResponseEntity<>(target, HttpStatus.CREATED);
     }
 
     @GetMapping("/idntf_delete")
-    public ResponseEntity<?> delete(@RequestBody IdentificationTarget member, BindingResult bindingResult) {
+    public ResponseEntity<?> delete(@RequestBody IdentificationTarget target, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
-        memberRepository.delete(member);
+
+        identificationService.delete(target);
         log.info("회원삭제완료");
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/identf_update")
-    public ResponseEntity<?> update(@RequestBody IdentificationTarget member, BindingResult bindingResult) {
+    public ResponseEntity<?> update(@RequestBody IdentificationTarget target, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.info("error={}", bindingResult);
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
-        memberRepository.updateByMissingcode(member);
-        log.info("업데이트완료 member={}", member);
-        return new ResponseEntity<>(member, HttpStatus.OK);
+        IdentificationTarget updatedTarget = identificationService.update(target);
+        log.info("업데이트완료 target ={}", updatedTarget);
+
+        return new ResponseEntity<>(updatedTarget, HttpStatus.OK);
     }
 
     /**

@@ -8,8 +8,8 @@ public interface IdentificationRepository {
 
     IdentificationTarget save(IdentificationTarget member);
     List<IdentificationTarget> findAll();
+    IdentificationTarget updateTable(IdentificationTarget member);
     void delete(IdentificationTarget member);
-    IdentificationTarget updateByMissingcode(IdentificationTarget member);
 
     int countId(Long id);
     int countLoginID(String loginId);

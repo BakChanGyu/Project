@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.manager.Manager;
 import project.member.Member;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,11 +20,13 @@ public class LoginController {
 
     private final LoginService loginService;
 
+    @GetMapping("/login")
+    public String loginForm(@ModelAttribute("loginForm") LoginForm form) { return "login/loginForm"; }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginForm form, BindingResult bindingResult,
                         HttpServletRequest request) {
-        log.info("loginForm ={}", form);
-
+        
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
@@ -51,7 +54,29 @@ public class LoginController {
         return new ResponseEntity<>(loginMember, HttpStatus.OK);
     }
 
-    @GetMapping("logout")
+    @PostMapping("/manager_login")
+    public ResponseEntity<?> managerLogin(@RequestBody Manager manager, BindingResult bindingResult,
+                                          HttpServletRequest request) {
+
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
+        }
+
+        // 로그인 성공 처리
+        Manager loginManager = loginService.loginManager(manager.getManagerId(), manager.getManagerPwd());
+        log.info("loginManager ={}", loginManager);
+        // TODO: session 줄지 말지 생각
+
+        // 세션이 없으면 신규 생성
+        HttpSession session = request.getSession(true);
+        // 세션에 로그인 정보 보관
+        session.setAttribute("login-manager", loginManager);
+        log.info("session ={}", session);
+
+        return new ResponseEntity<>(loginManager, HttpStatus.OK);
+    }
+
+    @GetMapping("/logout")
     public void logout(HttpServletRequest request) {
 
         log.info("request ={}", request);
