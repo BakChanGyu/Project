@@ -73,7 +73,7 @@ public class EmailService{
         msg += "<br>";
         msg += "<p>아래 인증 링크를 눌러 회원가입을 완료해주세요!<p>";
         msg += "<br>";
-        msg += "<a href='http://43.201.13.38"
+        msg += "<a href='http://localhost:8080"
                 + "/api/verify_code?id=" + member.getMemberId()
                 + "&private_key=" + member.getPrivateKey()
                 + "'> 인증하기</a>";
