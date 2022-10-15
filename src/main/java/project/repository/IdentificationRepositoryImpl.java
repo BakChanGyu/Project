@@ -21,9 +21,7 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
 
     @Override
     public IdentificationTarget save(IdentificationTarget target) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into identification_target(id_code, name, rgst_date) values(?, ?, ?)");
-
+        String sql = "insert into identification_target(id_code, name, ssn, address, rgst_date) values(?, ?, ?, ?, now())";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -31,11 +29,12 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
 
         try {
             conn = getConnection();
-            pstmt = conn.prepareStatement(sb.toString());
+            pstmt = conn.prepareStatement(sql);
 
             pstmt.setString(1, target.getIdCode());
             pstmt.setString(2, target.getName());
-            pstmt.setDate(3, target.getRgstDate());
+            pstmt.setString(3, target.getSsn());
+            pstmt.setString(4, target.getAddress());
 
             pstmt.executeUpdate();
 
@@ -60,19 +59,22 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
-            List<IdentificationTarget> members = new ArrayList<>();
+            List<IdentificationTarget> targets = new ArrayList<>();
 
             while(rs.next()) {
-                IdentificationTarget member = new IdentificationTarget();
-                member.setIdCode(rs.getString("id_code"));
-                member.setName(rs.getString("name"));
-                member.setRgstDate(rs.getDate("rgst_date"));
-                member.setMemberId(rs.getLong("member_id"));
+                IdentificationTarget target = new IdentificationTarget();
 
-                members.add(member);
+                target.setIdCode(rs.getString("id_code"));
+                target.setName(rs.getString("name"));
+                target.setSsn(rs.getString("ssn"));
+                target.setSsn(rs.getString("address"));
+                target.setRgstDate(rs.getDate("rgst_date"));
+                target.setMemberId(rs.getLong("member_id"));
+
+                targets.add(target);
             }
 
-            return members;
+            return targets;
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         } finally {
@@ -81,18 +83,8 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     }
 
     @Override
-    public int countId(Long id) {
-        return 0;
-    }
-
-    @Override
-    public int countLoginID(String loginId) {
-        return 0;
-    }
-
-    @Override
     public IdentificationTarget updateTable(IdentificationTarget target) {
-        String sql = "update identification_target set name = ?, rgst_date = ?, member_id = ? where id_code = ?";
+        String sql = "update identification_target set name = ?, ssn = ?, address = ?, update_date = now() where id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -103,8 +95,8 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             pstmt = conn.prepareStatement(sql);
 
             pstmt.setString(1, target.getName());
-            pstmt.setDate(2, target.getRgstDate());
-            pstmt.setLong(3, target.getMemberId());
+            pstmt.setString(2, target.getSsn());
+            pstmt.setString(3, target.getAddress());
             pstmt.setString(4, target.getIdCode());
 
             pstmt.executeUpdate();

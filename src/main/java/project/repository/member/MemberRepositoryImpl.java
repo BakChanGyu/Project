@@ -1,10 +1,10 @@
-package project.repository;
+package project.repository.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
-import project.identification.IdentificationTarget;
 import project.member.Member;
+import project.repository.member.MemberRepository;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -22,7 +22,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Member save(Member member) {
 
-        String sql = "insert into member(member_id, loginId, member_name, password, check_password, email, member_type, private_key) values(?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "insert into member(member_id, loginId, member_name, password, email, member_type, private_key) values(?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -36,10 +36,9 @@ public class MemberRepositoryImpl implements MemberRepository {
             pstmt.setString(2, member.getLoginId());
             pstmt.setString(3, member.getMemberName());
             pstmt.setString(4, member.getPassword());
-            pstmt.setString(5, member.getCheckPwd());
-            pstmt.setString(6, member.getEmail());
-            pstmt.setString(7, member.getMemberType());
-            pstmt.setString(8, member.getPrivateKey());
+            pstmt.setString(5, member.getEmail());
+            pstmt.setString(6, member.getMemberType());
+            pstmt.setString(7, member.getPrivateKey());
 
             pstmt.executeUpdate();
 

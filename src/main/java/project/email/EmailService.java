@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import project.member.Member;
-import project.repository.MemberRepository;
+import project.repository.member.MemberRepository;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -74,8 +74,8 @@ public class EmailService{
         msg += "<p>아래 인증 링크를 눌러 회원가입을 완료해주세요!<p>";
         msg += "<br>";
         msg += "<a href='http://localhost:8080"
-                + "/api/verify_code?id=" + member.getMemberId()
-                + "&private_key=" + member.getPrivateKey()
+                + "/api/verify_code?memberId=" + member.getMemberId()
+                + "&privateKey=" + member.getPrivateKey()
                 + "'> 인증하기</a>";
         msg += "<br>";
         msg += "</div>";

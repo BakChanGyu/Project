@@ -2,7 +2,7 @@ package project.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import project.repository.MemberRepository;
+import project.repository.member.MemberRepository;
 
 import java.util.List;
 

@@ -10,7 +10,4 @@ public interface IdentificationRepository {
     List<IdentificationTarget> findAll();
     IdentificationTarget updateTable(IdentificationTarget member);
     void delete(IdentificationTarget member);
-
-    int countId(Long id);
-    int countLoginID(String loginId);
 }

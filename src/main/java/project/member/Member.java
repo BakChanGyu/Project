@@ -14,8 +14,6 @@ public class Member {
     @NotEmpty
     private String password; // 비밀번호
     @NotEmpty
-    private String checkPwd; // 비밀번호 확인
-    @NotEmpty
     private String memberName; // 사용자 이름
     @NotEmpty
     private String email; // 이메일

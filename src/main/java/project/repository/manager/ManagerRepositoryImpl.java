@@ -1,9 +1,10 @@
-package project.repository;
+package project.repository.manager;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 import project.manager.Manager;
+import project.repository.manager.ManagerRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ManagerRepositoryImpl implements ManagerRepository{
+public class ManagerRepositoryImpl implements ManagerRepository {
 
     private final DataSource dataSource;
 

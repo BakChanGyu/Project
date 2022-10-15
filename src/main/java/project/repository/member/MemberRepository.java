@@ -1,4 +1,4 @@
-package project.repository;
+package project.repository.member;
 
 import project.member.Member;
 

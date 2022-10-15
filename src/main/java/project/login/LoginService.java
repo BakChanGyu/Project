@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import project.manager.Manager;
 import project.member.Member;
-import project.repository.ManagerRepository;
-import project.repository.MemberRepository;
+import project.repository.manager.ManagerRepository;
+import project.repository.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor

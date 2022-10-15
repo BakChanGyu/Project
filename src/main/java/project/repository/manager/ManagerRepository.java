@@ -1,4 +1,4 @@
-package project.repository;
+package project.repository.manager;
 
 import project.manager.Manager;
 
