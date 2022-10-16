@@ -7,10 +7,7 @@ import project.target.student.csat.Csat;
 import project.target.student.toeic.Toeic;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +34,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             pstmt.setString(2, target.getName());
             pstmt.setString(3, target.getSsn());
             pstmt.setString(4, target.getAddress());
-            pstmt.setDate(5, target.getExamDate());
+            pstmt.setDate(5, Date.valueOf(target.getExamDate()));
             pstmt.setString(6, target.getExamLoc());
 
             pstmt.executeUpdate();
@@ -73,10 +70,10 @@ public class ToeicRepositoryImpl implements ToeicRepository {
                 target.setName(rs.getString("name"));
                 target.setSsn(rs.getString("ssn"));
                 target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getDate("exam_date"));
+                target.setExamDate(rs.getString("exam_date"));
                 target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getDate("register_date"));
-                target.setUpdateDate(rs.getDate("update_date"));
+                target.setRgstDate(rs.getString("register_date"));
+                target.setUpdateDate(rs.getString("update_date"));
 
                 targets.add(target);
             }
@@ -111,10 +108,10 @@ public class ToeicRepositoryImpl implements ToeicRepository {
                 target.setName(rs.getString("name"));
                 target.setSsn(rs.getString("ssn"));
                 target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getDate("exam_date"));
+                target.setExamDate(rs.getString("exam_date"));
                 target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getDate("register_date"));
-                target.setUpdateDate(rs.getDate("update_date"));
+                target.setRgstDate(rs.getString("register_date"));
+                target.setUpdateDate(rs.getString("update_date"));
 
                 return Optional.of(target);
             } else {
@@ -173,7 +170,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             pstmt.setString(1, target.getName());
             pstmt.setString(2, target.getSsn());
             pstmt.setString(3, target.getAddress());
-            pstmt.setDate(4, target.getExamDate());
+            pstmt.setDate(4, Date.valueOf(target.getExamDate()));
             pstmt.setString(5, target.getExamLoc());
             pstmt.setString(6, target.getIdCode());
 

@@ -27,8 +27,6 @@ public class MissingController {
     @PostMapping("/missing/add")
     public ResponseEntity<?> add(@RequestBody Missing target, BindingResult bindingResult) {
 
-        log.info("ssn? ={}", target.getSsn());
-        log.info("date타입인가? ={}", target.getMissingDate());
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);

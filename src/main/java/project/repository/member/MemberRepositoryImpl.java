@@ -164,7 +164,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public void update(Member member) {
 
-        String sql = "update member login_id = ?, member_name = ?, password = ?, email = ?, member_type = ? set where member_id = ?";
+        String sql = "update member set login_id = ?, member_name = ?, password = ?, email = ?, member_type = ? where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;

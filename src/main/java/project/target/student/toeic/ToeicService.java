@@ -7,6 +7,7 @@ import project.target.student.csat.Csat;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +44,34 @@ public class ToeicService {
         toeicRepository.delete(idCode);
     }
 
+    // 개인 코드 생성
+    public String createIdCode() {
+        return createRand();
+    }
+
     private Toeic validateDuplicateMissing(Toeic target) {
 
         return toeicRepository.findAll().stream()
                 .filter(t -> t.getSsn().equals(target.getSsn()))
                 .findAny()
                 .orElse(null);
+    }
+
+    // 개인코드생성
+    private String createRand() {
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+
+        // 8자리 개인코드 생성
+        for (int i = 0; i < 8; i++) {
+            if (i == 2 || i == 5) {
+                sb.append((random.nextInt(10)));
+            } else {
+                // a~z사이 알파벳 ('a' = 97)
+                sb.append((char) ((random.nextInt(26)) + 97));
+            }
+        }
+
+        return sb.toString();
     }
 }

@@ -35,7 +35,7 @@ public class CsatController {
 
         try {
             // 난수 생성하여 idCode 주입
-            String idCode = createIdCode();
+            String idCode = csatService.createIdCode();
             target.setIdCode(idCode);
 
             csatService.save(target);
@@ -96,31 +96,4 @@ public class CsatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // 개인코드생성
-    private String createIdCode() {
-        StringBuffer sb = new StringBuffer();
-        Random random = new Random();
-
-        // 8자리 개인코드 생성
-        for (int i = 0; i < 8; i++) {
-            if (i == 2 || i == 5) {
-                sb.append((random.nextInt(10)));
-            } else {
-                // a~z사이 알파벳 ('a' = 97)
-                sb.append((char) ((random.nextInt(26)) + 97));
-            }
-        }
-
-        return sb.toString();
-    }
-
-    // 날짜 변환
-    private String convertDate(String date) {
-        Date now = new Date(date);
-        String pattern = "yyyy-MM-dd";
-        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-        String covDate = formatter.format(now);
-
-        return covDate;
-    }
 }
