@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import project.email.EmailService;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -21,45 +22,36 @@ public class MemberController {
     private final EmailService emailService;
 
     // 회원가입 API
-    @PostMapping("/add")
+    @PostMapping("/member/add")
     public ResponseEntity<?> add(@RequestBody Member member,
                                  BindingResult bindingResult) throws Exception {
-        // 에러가 있는 경우 다시 회원가입 폼으로
+        // 에러가 있는 경우
         if (bindingResult.hasErrors()) {
             log.error("error ={}", bindingResult);
             return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
         }
 
-        // 아이디 중복체크
-        int countId = memberService.countId(member);
-        int countLoginId = memberService.countLoginId(member);
-        log.info("countId ={}", countId);
-        log.info("countLoginId ={}", countLoginId);
-
-        // 식별번호(id)가 중복되면 에러
-        if (countId != 0) {
-            bindingResult.reject("signupFail", "식별번호 또는 아이디가 중복입니다.");
-            log.info("id 중복. 회원가입실패");
-            return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
-        }
-        // 로그인아이디가 중복되면 에러
-        if (countLoginId != 0) {
-            bindingResult.reject("signupFail", "식별번호 또는 아이디가 중복입니다.");
-            log.info("loginId 중복. 회원가입실패");
-            return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
+        try {
+            memberService.addMember(member);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
 
-        memberService.addMember(member);
-        log.info("회원가입완료 member ={} ", member);
+        log.info("임시 회원가입 완료 member ={} ", member);
 
         // 이메일로 인증코드 발송
-        emailService.sendSimpleMessage(member);
+        try {
+            emailService.sendSimpleMessage(member);
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("can not send email");
+            return new ResponseEntity<>(bindingResult, HttpStatus.OK);
+        }
         log.info("인증코드 전송 완료");
 
         return new ResponseEntity<>(member, HttpStatus.CREATED);
     }
 
-    @GetMapping("/member_list")
+    @GetMapping("/member/list")
     public ResponseEntity<?> list() {
         List<Member> members = memberService.findMembers();
 
@@ -73,8 +65,33 @@ public class MemberController {
         return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
-    @GetMapping("/delete")
-    public void delete(Long memberId) {
+    // 회원수정을 위한 api (2단계)
+    // 1. memberId를 key로 회원 정보를 가져온다.
+    @GetMapping("/member/update_form/{memberId}")
+    public ResponseEntity<?> updateForm(@PathVariable Long memberId) {
+
+        Optional<Member> member = memberService.findOne(memberId);
+        log.info("find member ={}", member);
+        return new ResponseEntity<>(member, HttpStatus.OK);
+    }
+
+    // 2. 회원 정보를 업데이트 한다.
+    @PostMapping("/member/update")
+    public ResponseEntity<?> update(@RequestBody Member member) {
+        log.info("update member ={}", member);
+
+        memberService.updateMember(member);
+        log.info("회원 정보 업데이트 완료");
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // 회원삭제를 위한 api
+    @GetMapping("/member/delete/{memberId}")
+    public ResponseEntity<?> delete(@PathVariable Long memberId) {
         memberService.deleteMember(memberId);
+        log.info("회원 삭제 완료");
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -22,7 +22,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Member save(Member member) {
 
-        String sql = "insert into member(member_id, loginId, member_name, password, email, member_type, private_key) values(?, ?, ?, ?, ?, ?, ?)";
+        String sql = "insert into member(member_id, login_id, member_name, password, email, member_type, private_key) values(?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -86,7 +86,7 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     // 식별번호로 조회 -> 아이디찾기등
     @Override
-    public Optional<Member> findById(Long id) {
+    public Optional<Member> findById(Long memberId) {
 
         String sql = "select * from member where member_id = ?";
 
@@ -97,19 +97,18 @@ public class MemberRepositoryImpl implements MemberRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, id);
+            pstmt.setLong(1, memberId);
 
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 Member member = new Member();
                 member.setMemberId(rs.getLong("member_id"));
-                member.setLoginId(rs.getString("loginId"));
+                member.setLoginId(rs.getString("login_id"));
                 member.setMemberName(rs.getString("member_name"));
                 member.setPassword(rs.getString("password"));
                 member.setEmail(rs.getString("email"));
                 member.setMemberType(rs.getString("member_type"));
-                member.setPrivateKey(rs.getString("private_key"));
 
                 return Optional.of(member);
             } else {
@@ -125,9 +124,9 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     // 로그인 아이디로 조회
     @Override
-    public Optional<Member> findLoginId(String loginId) {
+    public Optional<Member> findByLoginId(String loginId) {
 
-        String sql = "select * from member where loginId = ?";
+        String sql = "select * from member where login_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -143,7 +142,7 @@ public class MemberRepositoryImpl implements MemberRepository {
             if (rs.next()) {
                 Member member = new Member();
                 member.setMemberId(rs.getLong("member_id"));
-                member.setLoginId(rs.getString("loginId"));
+                member.setLoginId(rs.getString("login_id"));
                 member.setPassword(rs.getString("password"));
                 member.setMemberName(rs.getString("member_name"));
                 member.setEmail(rs.getString("email"));
@@ -161,11 +160,40 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    // 멤버 업데이트
+    @Override
+    public void update(Member member) {
+
+        String sql = "update member login_id = ?, member_name = ?, password = ?, email = ?, member_type = ? set where member_id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, member.getLoginId());
+            pstmt.setString(2, member.getMemberName());
+            pstmt.setString(3, member.getPassword());
+            pstmt.setString(4, member.getEmail());
+            pstmt.setString(5, member.getMemberType());
+            pstmt.setLong(6, member.getMemberId());
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
     // 멤버 삭제
     @Override
     public void delete(Long memberId) {
 
-        String sql = "delete from member where memberId = ?";
+        String sql = "delete from member where member_id = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -177,65 +205,6 @@ public class MemberRepositoryImpl implements MemberRepository {
             pstmt.setLong(1, memberId);
             pstmt.execute();
 
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            close(conn, pstmt, rs);
-        }
-    }
-
-
-    // 아이디 중복체크
-    @Override
-    public int countId(Long id) {
-
-        String sql = "select count(*) from member where member_id = ?";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, id);
-
-            rs = pstmt.executeQuery();
-
-            if (rs.next()){
-                return rs.getInt(1);
-            } else {
-                return -1;
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            close(conn, pstmt, rs);
-        }
-    }
-
-    // 로그인 중복체크
-    @Override
-    public int countLoginID(String loginId) {
-
-        String sql = "select count(*) from member where loginId = ?";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, loginId);
-
-            rs = pstmt.executeQuery();
-
-            if (rs.next()){
-                return rs.getInt(1);
-            } else {
-                return -1;
-            }
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         } finally {

@@ -1,4 +1,4 @@
-package project.target.student.toeic;
+package project.target.student.csat;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import java.sql.Date;
 
 @Data
-public class toeic {
+public class Csat {
 
     @NotEmpty
     private String idCode; // 개인코드

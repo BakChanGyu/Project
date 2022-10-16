@@ -1,9 +1,9 @@
-package project.repository;
+package project.repository.target;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
-import project.identification.IdentificationTarget;
+import project.target.student.csat.Csat;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,16 +12,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@RequiredArgsConstructor
 @Repository
-public class IdentificationRepositoryImpl implements IdentificationRepository {
+@RequiredArgsConstructor
+public class CsatRepositoryImpl implements CsatRepository {
 
     private final DataSource dataSource;
 
     @Override
-    public IdentificationTarget save(IdentificationTarget target) {
-        String sql = "insert into identification_target(id_code, name, ssn, address, rgst_date) values(?, ?, ?, ?, now())";
+    public Csat save(Csat target) {
+        String sql = "insert into csat(id_code, name, ssn, address, exam_date, exam_loc, register_date) values(?, ?, ?, ?, ?, ?, now())";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -35,6 +36,8 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             pstmt.setString(2, target.getName());
             pstmt.setString(3, target.getSsn());
             pstmt.setString(4, target.getAddress());
+            pstmt.setDate(5, target.getExamDate());
+            pstmt.setString(6, target.getExamLoc());
 
             pstmt.executeUpdate();
 
@@ -47,8 +50,9 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     }
 
     @Override
-    public List<IdentificationTarget> findAll() {
-        String sql = "select * from identification_target";
+    public List<Csat> findAll() {
+
+        String sql = "select * from csat";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -59,17 +63,19 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
-            List<IdentificationTarget> targets = new ArrayList<>();
+            List<Csat> targets = new ArrayList<>();
 
             while(rs.next()) {
-                IdentificationTarget target = new IdentificationTarget();
+                Csat target = new Csat();
 
                 target.setIdCode(rs.getString("id_code"));
                 target.setName(rs.getString("name"));
                 target.setSsn(rs.getString("ssn"));
-                target.setSsn(rs.getString("address"));
-                target.setRgstDate(rs.getDate("rgst_date"));
-                target.setMemberId(rs.getLong("member_id"));
+                target.setAddress(rs.getString("address"));
+                target.setExamDate(rs.getDate("exam_date"));
+                target.setExamLoc(rs.getString("exam_loc"));
+                target.setRgstDate(rs.getDate("register_date"));
+                target.setUpdateDate(rs.getDate("update_date"));
 
                 targets.add(target);
             }
@@ -83,8 +89,77 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     }
 
     @Override
-    public IdentificationTarget updateTable(IdentificationTarget target) {
-        String sql = "update identification_target set name = ?, ssn = ?, address = ?, update_date = now() where id_code = ?";
+    public Optional<Csat> findByIdCode(String idCode) {
+
+        String sql = "select * from csat where id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, idCode);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                Csat target = new Csat();
+                target.setIdCode(rs.getString("id_code"));
+                target.setName(rs.getString("name"));
+                target.setSsn(rs.getString("ssn"));
+                target.setAddress(rs.getString("address"));
+                target.setExamDate(rs.getDate("exam_date"));
+                target.setExamLoc(rs.getString("exam_loc"));
+                target.setRgstDate(rs.getDate("register_date"));
+                target.setUpdateDate(rs.getDate("update_date"));
+
+                return Optional.of(target);
+            } else {
+                return Optional.empty();
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public String findName(String idCode) {
+
+        StringBuilder sb = new StringBuilder();
+        String sql = "select name from csat where id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, idCode);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                sb.append(rs.getString("name"));
+            }
+
+            return String.valueOf(sb);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public Csat update(Csat target) {
+
+        String sql = "update csat set name = ?, ssn = ?, address = ?, exam_date = ?, exam_loc = ?, update_date = now() where id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -97,7 +172,9 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
             pstmt.setString(1, target.getName());
             pstmt.setString(2, target.getSsn());
             pstmt.setString(3, target.getAddress());
-            pstmt.setString(4, target.getIdCode());
+            pstmt.setDate(4, target.getExamDate());
+            pstmt.setString(5, target.getExamLoc());
+            pstmt.setString(6, target.getIdCode());
 
             pstmt.executeUpdate();
 
@@ -110,8 +187,9 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     }
 
     @Override
-    public void delete(IdentificationTarget target) {
-        String sql = "delete from identification_target where id_code = ?";
+    public void delete(String idCode) {
+
+        String sql = "delete from csat where id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -120,7 +198,7 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, target.getIdCode());
+            pstmt.setString(1, idCode);
             pstmt.execute();
 
         } catch (SQLException e) {
@@ -133,6 +211,7 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
     private Connection getConnection() {
         return DataSourceUtils.getConnection(dataSource);
     }
+
     private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
         try {
             if (rs != null) {
@@ -141,7 +220,6 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         try {
             if (pstmt != null) {
                 pstmt.close();
@@ -149,7 +227,6 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         try {
             if (conn != null) {
                 close(conn);
@@ -159,7 +236,7 @@ public class IdentificationRepositoryImpl implements IdentificationRepository {
         }
     }
 
-    private void close(Connection conn) throws SQLException{
+    private void close(Connection conn) throws SQLException {
         DataSourceUtils.releaseConnection(conn, dataSource);
     }
 }

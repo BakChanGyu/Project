@@ -11,6 +11,7 @@ import project.member.Member;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -39,7 +40,7 @@ public class LoginController {
 
         // 로그인 성공 처리
         // 인증코드 대조하여 "certified"면 로그인 허용
-        Member verifyCode = loginService.verifyCode(form.getLoginId());
+        Optional<Member> verifyCode = loginService.verifyCode(form.getLoginId());
         log.info("verifyCode ={}", verifyCode);
         if (verifyCode == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -90,11 +91,6 @@ public class LoginController {
         log.info("session ={}", session);
     }
 
-
-    /**
-     * TODO list=
-     * 로그인 vaild(글자제한 등) -> 리액트에서 처리하는 방법 찾아야.
-     */
 
 
 }

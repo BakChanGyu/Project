@@ -10,11 +10,9 @@ public interface MemberRepository {
     Member save(Member member);
     List<Member> findAll();
     Optional<Member> findById(Long id);
-    Optional<Member> findLoginId(String loginId);
+    Optional<Member> findByLoginId(String loginId);
+    void update(Member member);
     void delete(Long memberId);
     void addPrivateKey(Long id, String code);
     String findPrivateKeyById(Long id);
-
-    int countId(Long id);
-    int countLoginID(String loginId);
 }

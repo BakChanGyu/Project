@@ -4,21 +4,28 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import project.file.DeleteFile;
+import project.repository.target.CsatRepository;
+import project.repository.target.MissingRepository;
+import project.repository.target.ToeicRepository;
+import project.target.missing.Missing;
 
 import java.util.*;
 
 @Slf4j
-@RestController
-@RequestMapping("/api")
-public class AIController {
+@Service
+@RequiredArgsConstructor
+public class AIService {
+
+    private final MissingRepository missingRepository;
+    private final CsatRepository csatRepository;
+    private final ToeicRepository toeicRepository;
 
     // API서버와 통신을 위해 필요한 객체 생성
     RestTemplate restTemplate = new RestTemplate();
@@ -29,8 +36,7 @@ public class AIController {
     private String dir;
 
     // 인공지능 모델에 들어갈 이미지 받아오기
-    @GetMapping("/loadAI")
-    public JsonObject requestToFlask () throws JsonProcessingException {
+    public JsonObject requestToFlask (Integer itemId) throws JsonProcessingException {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -53,14 +59,24 @@ public class AIController {
 
             // Json 직접 생성하여 전달
             Map.Entry<String, Integer> first = entryList.get(0);
-            Map.Entry<String, Integer> second = entryList.get(1);
+            // Map.Entry<String, Integer> second = entryList.get(1);
+
+            // json에서 뽑아낸 값은 idCode값이므로 idCode값을 key로 name 받아옴
+            String idCode = first.getKey();
+            String name = null;
+            switch (itemId) {
+                case 1:
+                    name = missingRepository.findName(idCode);
+                case 2:
+                    name = csatRepository.findName(idCode);
+                case 3:
+                    name = toeicRepository.findName(idCode);
+            }
 
             jsonObject = new JsonObject();
 
-            jsonObject.addProperty("firstName", first.getKey());
+            jsonObject.addProperty("firstName", name);
             jsonObject.addProperty("firstProbability", first.getValue());
-            jsonObject.addProperty("secondName", second.getKey());
-            jsonObject.addProperty("secondProbability", second.getValue());
 
             // 가장높은 확률이 40미만이라면 필적등록이 안 된 사람임을 알림
             if (first.getValue() < 40) {
@@ -70,17 +86,6 @@ public class AIController {
             }
 
             log.info("jsonObject={} ", jsonObject);
-
-            /**
-             * TODO list
-             * 1. json형태로 결과 가져온 후 가장높은확률값 혹은 두번쨰까지만 출력해주기
-             * 2. 필적과 일치하지 않는다 (ex 김흥돌과 일치할확률 40% 미만일경우 필적정보가 없음을 출력 등)
-             * 3. 한번 필적감정 후 target 폴더에 올렸던 이미지 파일 삭제
-             *
-             * 수정사항 : 파일명이 제각각임 bsh_cqz_xeh_ 등.. 그래서 파싱힘듬 이 파일들에는
-             * MissingMember(추후명칭변경예정)의 필적이 들어가므로 MissingMember의 이름이 ??
-             * >>> json 직접 생성해서 해결
-             */
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         } finally {

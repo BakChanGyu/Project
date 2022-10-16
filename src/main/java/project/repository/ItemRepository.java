@@ -9,8 +9,8 @@ import java.util.Map;
 @Repository
 public class ItemRepository {
 
-    private Map<Long, Item> store = new HashMap<>();
-    private long sequence = 0L;
+    private Map<Integer, Item> store = new HashMap<>();
+    private int sequence = 0;
 
     public Item save(Item item) {
         item.setItemId(++sequence);

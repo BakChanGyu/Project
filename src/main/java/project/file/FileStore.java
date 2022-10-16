@@ -16,14 +16,12 @@ public class FileStore {
     @Value("${file.dir}")
     private String fileDir;
 
-    // 서버에 저장될 파일 경로 + 이름
-    public String getFullPath(String filename) {
-        return fileDir + filename;
-    }
-
     // 이미지 여러개 업로드시
     public List<UploadFile> storeFiles(List<MultipartFile> multipartFiles) throws IOException {
         List<UploadFile> storeFileResult = new ArrayList<>();
+        if (multipartFiles.size() != 100) {
+            throw new IOException("100장의 이미지 파일을 올려주세요.");
+        }
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFile.isEmpty()) {
                 storeFileResult.add(storeFile(multipartFile));
@@ -58,5 +56,10 @@ public class FileStore {
         // 원래파일의 . 뒤에 오는 위치에 확장자명 저장.
         int pos = originalFileName.lastIndexOf(".");
         return originalFileName.substring(pos + 1);
+    }
+
+    // 서버에 저장될 파일 경로 + 이름
+    private String getFullPath(String filename) {
+        return fileDir + filename;
     }
 }

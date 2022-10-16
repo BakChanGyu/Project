@@ -6,9 +6,8 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class Member {
-
     @NotNull
-    private Long memberId; // 회원 고유번호
+    private Long memberId;
     @NotEmpty
     private String loginId; // 로그인 ID
     @NotEmpty

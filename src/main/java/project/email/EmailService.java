@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 @Service
-@EnableAsync
 public class EmailService{
 
     // Bean등록해둔 EmailConfig를 javaMailSender라는 이름으로 Autowired
@@ -32,14 +31,12 @@ public class EmailService{
     }
 
     // 메일을 보내는 메서드
-    @Async
     public void sendSimpleMessage(Member member) throws Exception {
 
         MimeMessage message = createMessage(member);
         try {
             javaMailSender.send(message);
         } catch (MailException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException();
         } finally {
             memberRepository.addPrivateKey(member.getMemberId(),emailPassword);
