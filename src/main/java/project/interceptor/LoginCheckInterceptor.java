@@ -22,8 +22,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         if (session == null) {
             log.info("미인증 사용자 요청");
             // 로그인 화면으로 redirect
-            response.sendRedirect("/login?redirectURL=" + requestURI);
-            return false; // postHandle 실행 X
+            throw new IllegalAccessException();
         }
         return true;
     }

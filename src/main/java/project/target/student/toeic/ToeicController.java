@@ -36,7 +36,7 @@ public class ToeicController {
         try {
             // 난수 생성하여 idCode 주입
             String idCode = toeicService.createIdCode();
-            target.setIdCode(idCode);
+            target.setToeicIdCode(idCode);
 
             toeicService.save(target);
 
@@ -68,10 +68,10 @@ public class ToeicController {
 
     // 토익 응시자 정보 수정 api (2단계)
     // 1. idCode를 key로 응시자 정보를 가져온다.
-    @GetMapping("/toeic/update_form/{idCode}")
-    public ResponseEntity<?> updateForm(@PathVariable String idCode) {
+    @GetMapping("/toeic/update_form/{toeicIdCode}")
+    public ResponseEntity<?> updateForm(@PathVariable String toeicIdCode) {
 
-        Optional<Toeic> target = toeicService.findOne(idCode);
+        Optional<Toeic> target = toeicService.findOne(toeicIdCode);
         log.info("find target ={}", target);
         return new ResponseEntity<>(target, HttpStatus.OK);
     }
@@ -88,9 +88,9 @@ public class ToeicController {
     }
 
     // 수능 응시자 정보 삭제 api
-    @GetMapping("/toeic/delete/{idCode}")
-    public ResponseEntity<?> delete(@PathVariable String idCode) {
-        toeicService.delete(idCode);
+    @GetMapping("/toeic/delete/{toeicIdCode}")
+    public ResponseEntity<?> delete(@PathVariable String toeicIdCode) {
+        toeicService.delete(toeicIdCode);
         log.info("토익 응시자 정보 삭제 완료");
 
         return new ResponseEntity<>(HttpStatus.OK);

@@ -6,14 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import project.target.missing.Missing;
-import project.target.missing.MissingService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @RestController
@@ -36,7 +31,7 @@ public class CsatController {
         try {
             // 난수 생성하여 idCode 주입
             String idCode = csatService.createIdCode();
-            target.setIdCode(idCode);
+            target.setCsatIdCode(idCode);
 
             csatService.save(target);
 
@@ -68,10 +63,10 @@ public class CsatController {
 
     // 수능 응시자 정보 수정 api (2단계)
     // 1. idCode를 key로 응시자 정보를 가져온다.
-    @GetMapping("/csat/update_form/{idCode}")
-    public ResponseEntity<?> updateForm(@PathVariable String idCode) {
+    @GetMapping("/csat/update_form/{csatIdCode}")
+    public ResponseEntity<?> updateForm(@PathVariable String csatIdCode) {
 
-        Optional<Csat> target = csatService.findOne(idCode);
+        Optional<Csat> target = csatService.findOne(csatIdCode);
         log.info("find target ={}", target);
         return new ResponseEntity<>(target, HttpStatus.OK);
     }
@@ -88,9 +83,9 @@ public class CsatController {
     }
 
     // 수능 응시자 정보 삭제 api
-    @GetMapping("/csat/delete/{idCode}")
-    public ResponseEntity<?> delete(@PathVariable String idCode) {
-        csatService.delete(idCode);
+    @GetMapping("/csat/delete/{csatIdCode}")
+    public ResponseEntity<?> delete(@PathVariable String csatIdCode) {
+        csatService.delete(csatIdCode);
         log.info("수능 응시자 정보 삭제 완료");
 
         return new ResponseEntity<>(HttpStatus.OK);

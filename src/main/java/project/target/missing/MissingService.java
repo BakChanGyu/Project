@@ -1,14 +1,9 @@
 package project.target.missing;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Service;
 import project.repository.target.MissingRepository;
-import project.target.student.csat.Csat;
 
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -34,8 +29,8 @@ public class MissingService {
     }
 
     // idCode를 key로 실종자 조회
-    public Optional<Missing> findOne(String idCode) {
-        return missingRepository.findByIdCode(idCode);
+    public Optional<Missing> findOne(String missingIdCode) {
+        return missingRepository.findByIdCode(missingIdCode);
     }
 
 
@@ -45,23 +40,19 @@ public class MissingService {
     }
 
     // 실종자 정보 삭제
-    public void delete(String idCode) {
-        missingRepository.delete(idCode);
+    public void delete(String missingIdCode) {
+        missingRepository.delete(missingIdCode);
     }
 
     // 개인 코드 생성
     public String createIdCode() {
         return createRand();
     }
-//    // 문자열을 데이트 형식으로 변환
-//    public Date converString(String str) throws ParseException {
-//        return convertStringToDate(str);
-//    }
 
     private Missing validateDuplicateMissing(Missing target) {
 
         return missingRepository.findAll().stream()
-                .filter(t -> t.getSsn().equals(target.getSsn()))
+                .filter(t -> t.getMissingSsn().equals(target.getMissingSsn()))
                 .findAny()
                 .orElse(null);
     }
@@ -83,12 +74,4 @@ public class MissingService {
 
         return sb.toString();
     }
-
-//    private Date convertStringToDate(String str) throws ParseException {
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-//        java.util.Date utilDate = simpleDateFormat.parse(str);
-//        Date date = new Date(utilDate.getTime());
-//
-//        return date;
-//    }
 }

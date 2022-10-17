@@ -9,13 +9,13 @@ import java.sql.Date;
 public class Missing {
 
     @NotEmpty
-    private String idCode; // 개인 코드
+    private String missingIdCode; // 개인 코드
     @NotEmpty
-    private String name; // 이름
+    private String missingName; // 이름
     @NotEmpty
-    private String ssn; // 주민등록번호
+    private String missingSsn; // 주민등록번호
     @NotEmpty
-    private String address; // 주소
+    private String missingAddress; // 주소
 
     private String missingDate; // 실종일자
 
@@ -23,7 +23,7 @@ public class Missing {
 
     private String protectorTel; // 보호자 연락처
     @NotEmpty
-    private String rgstDate; // 등록일자 - 실종자 등록시 서버에서 자동생성
+    private String missingRgstDate; // 등록일자 - 실종자 등록시 서버에서 자동생성
 
-    private String updateDate; // 수정일자 - 업데이트시 서버에서 자동생성
+    private String missingUpdateDate; // 수정일자 - 업데이트시 서버에서 자동생성
 }

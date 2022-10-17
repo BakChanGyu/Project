@@ -20,7 +20,7 @@ public class MissingRepositoryImpl implements MissingRepository {
     @Override
     public Missing save(Missing target) {
 
-        String sql = "insert into missing(id_code, name, ssn, address, missing_date, protector_name, protector_tel, register_date) values(?, ?, ?, ?, ?, ?, ?, now())";
+        String sql = "insert into missing(missing_id_code, missing_name, missing_ssn, missing_address, missing_date, protector_name, protector_tel, missing_register_date) values(?, ?, ?, ?, ?, ?, ?, now())";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -30,10 +30,10 @@ public class MissingRepositoryImpl implements MissingRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getIdCode());
-            pstmt.setString(2, target.getName());
-            pstmt.setString(3, target.getSsn());
-            pstmt.setString(4, target.getAddress());
+            pstmt.setString(1, target.getMissingIdCode());
+            pstmt.setString(2, target.getMissingName());
+            pstmt.setString(3, target.getMissingSsn());
+            pstmt.setString(4, target.getMissingAddress());
             pstmt.setDate(5, Date.valueOf(target.getMissingDate()));
             pstmt.setString(6, target.getProtectorName());
             pstmt.setString(7, target.getProtectorTel());
@@ -67,15 +67,15 @@ public class MissingRepositoryImpl implements MissingRepository {
             while(rs.next()) {
                 Missing target = new Missing();
 
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
+                target.setMissingIdCode(rs.getString("missing_id_code"));
+                target.setMissingName(rs.getString("missing_name"));
+                target.setMissingSsn(rs.getString("missing_ssn"));
+                target.setMissingAddress(rs.getString("missing_address"));
                 target.setMissingDate(rs.getString("missing_date"));
                 target.setProtectorName(rs.getString("protector_name"));
                 target.setProtectorTel(rs.getString("protector_tel"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setMissingRgstDate(rs.getString("missing_register_date"));
+                target.setMissingUpdateDate(rs.getString("missing_update_date"));
 
                 targets.add(target);
             }
@@ -90,9 +90,9 @@ public class MissingRepositoryImpl implements MissingRepository {
 
     // 개인 코드로 조회
     @Override
-    public Optional<Missing> findByIdCode(String idCode) {
+    public Optional<Missing> findByIdCode(String missingIdCode) {
 
-        String sql = "select * from missing where id_code = ?";
+        String sql = "select * from missing where missing_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -101,21 +101,21 @@ public class MissingRepositoryImpl implements MissingRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, missingIdCode);
 
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 Missing target = new Missing();
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
+                target.setMissingIdCode(rs.getString("missing_id_code"));
+                target.setMissingName(rs.getString("missing_name"));
+                target.setMissingSsn(rs.getString("missing_ssn"));
+                target.setMissingAddress(rs.getString("missing_address"));
                 target.setMissingDate(String.valueOf(rs.getDate("missing_date")));
                 target.setProtectorName(rs.getString("protector_name"));
                 target.setProtectorTel(rs.getString("protector_tel"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setMissingRgstDate(rs.getString("missing_register_date"));
+                target.setMissingUpdateDate(rs.getString("missing_update_date"));
 
                 return Optional.of(target);
             } else {
@@ -130,10 +130,10 @@ public class MissingRepositoryImpl implements MissingRepository {
     }
 
     @Override
-    public String findName(String idCode) {
+    public String findName(String missingIdCode) {
 
         StringBuilder sb = new StringBuilder();
-        String sql = "select name from missing where id_code = ?";
+        String sql = "select name from missing where missing_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -143,11 +143,11 @@ public class MissingRepositoryImpl implements MissingRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, missingIdCode);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                sb.append(rs.getString("name"));
+                sb.append(rs.getString("missing_name"));
             }
 
             return String.valueOf(sb);
@@ -161,7 +161,7 @@ public class MissingRepositoryImpl implements MissingRepository {
     @Override
     public Missing update(Missing target) {
 
-        String sql = "update missing set name = ?, ssn = ?, address = ?, missing_date = ?, protector_name = ?, protector_tel = ?, update_date = now() where id_code = ?";
+        String sql = "update missing set missing_name = ?, missing_ssn = ?, missing_address = ?, missing_date = ?, protector_name = ?, protector_tel = ?, missing_update_date = now() where missing_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -171,13 +171,13 @@ public class MissingRepositoryImpl implements MissingRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getName());
-            pstmt.setString(2, target.getSsn());
-            pstmt.setString(3, target.getAddress());
+            pstmt.setString(1, target.getMissingName());
+            pstmt.setString(2, target.getMissingSsn());
+            pstmt.setString(3, target.getMissingAddress());
             pstmt.setDate(4, Date.valueOf(target.getMissingDate()));
             pstmt.setString(5, target.getProtectorName());
             pstmt.setString(6, target.getProtectorTel());
-            pstmt.setString(7, target.getIdCode());
+            pstmt.setString(7, target.getMissingIdCode());
 
             pstmt.executeUpdate();
 
@@ -190,9 +190,9 @@ public class MissingRepositoryImpl implements MissingRepository {
     }
 
     @Override
-    public void delete(String idCode) {
+    public void delete(String missingIdCode) {
 
-        String sql = "delete from missing where id_code = ?";
+        String sql = "delete from missing where missing_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -201,7 +201,7 @@ public class MissingRepositoryImpl implements MissingRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, missingIdCode);
             pstmt.execute();
 
         } catch (SQLException e) {

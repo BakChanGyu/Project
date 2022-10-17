@@ -8,12 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @RestController
@@ -26,7 +22,9 @@ public class MissingController {
     // 실종자 등록 api
     @PostMapping("/missing/add")
     public ResponseEntity<?> add(@RequestBody Missing target, BindingResult bindingResult) {
-
+        log.info("missingDate ={}", target.getMissingDate());
+        log.info("name ={}", target.getMissingName());
+        log.info("address ={}", target.getMissingAddress());
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);
@@ -36,16 +34,7 @@ public class MissingController {
         try {
             // 난수 생성하여 idCode 주입
             String idCode = missingService.createIdCode();
-            target.setIdCode(idCode);
-
-            // 입력받은 문자열을 date 타입으로 변환
-//            String missingDate = target.getMissingDate();
-//            try {
-//                Date date = missingService.converString(missingDate);
-//                target.setMissingDate(String.valueOf(date));
-//            } catch (ParseException e) {
-//                return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-//            }
+            target.setMissingIdCode(idCode);
 
             missingService.save(target);
 
@@ -77,10 +66,10 @@ public class MissingController {
 
     // 실종자 정보 수정 api (2단계)
     // 1. idCode를 key로 실종자 정보를 가져온다.
-    @GetMapping("/missing/update_form/{idCode}")
-    public ResponseEntity<?> updateForm(@PathVariable String idCode) {
+    @GetMapping("/missing/update_form/{missingIdCode}")
+    public ResponseEntity<?> updateForm(@PathVariable String missingIdCode) {
 
-        Optional<Missing> target = missingService.findOne(idCode);
+        Optional<Missing> target = missingService.findOne(missingIdCode);
         log.info("find target ={}", target);
         return new ResponseEntity<>(target, HttpStatus.OK);
     }
@@ -97,9 +86,9 @@ public class MissingController {
     }
 
     // 실종자 정보 삭제 api
-    @GetMapping("/missing/delete/{idCode}")
-    public ResponseEntity<?> delete(@PathVariable String idCode) {
-        missingService.delete(idCode);
+    @GetMapping("/missing/delete/{missingIdCode}")
+    public ResponseEntity<?> delete(@PathVariable String missingIdCode) {
+        missingService.delete(missingIdCode);
         log.info("실종자 정보 삭제 완료");
 
         return new ResponseEntity<>(HttpStatus.OK);

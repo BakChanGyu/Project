@@ -10,8 +10,8 @@ public interface ToeicRepository {
 
     Toeic save(Toeic target);
     List<Toeic> findAll();
-    Optional<Toeic> findByIdCode(String idCode);
-    String findName(String idCode);
+    Optional<Toeic> findByIdCode(String toeicIdCode);
+    String findName(String toeicIdCode);
     Toeic update(Toeic target);
-    void delete(String idCode);
+    void delete(String toeicIdCode);
 }

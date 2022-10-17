@@ -3,7 +3,6 @@ package project.target.student.toeic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import project.repository.target.ToeicRepository;
-import project.target.student.csat.Csat;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +51,7 @@ public class ToeicService {
     private Toeic validateDuplicateMissing(Toeic target) {
 
         return toeicRepository.findAll().stream()
-                .filter(t -> t.getSsn().equals(target.getSsn()))
+                .filter(t -> t.getToeicSsn().equals(target.getToeicSsn()))
                 .findAny()
                 .orElse(null);
     }

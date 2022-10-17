@@ -9,8 +9,8 @@ public interface MissingRepository {
 
     Missing save(Missing target);
     List<Missing> findAll();
-    Optional<Missing> findByIdCode(String idCode);
-    String findName(String idCode);
+    Optional<Missing> findByIdCode(String missingIdCode);
+    String findName(String missingIdCode);
     Missing update(Missing target);
-    void delete(String idCode);
+    void delete(String missingIdCode);
 }

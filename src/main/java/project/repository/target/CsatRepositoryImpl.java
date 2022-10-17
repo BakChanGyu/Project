@@ -19,7 +19,8 @@ public class CsatRepositoryImpl implements CsatRepository {
 
     @Override
     public Csat save(Csat target) {
-        String sql = "insert into csat(id_code, name, ssn, address, exam_date, exam_loc, register_date) values(?, ?, ?, ?, ?, ?, now())";
+        String sql = "insert into csat(csat_id_code, csat_name, csat_ssn, csat_address, csat_exam_date, csat_exam_loc, csat_register_date)" +
+                " values(?, ?, ?, ?, ?, ?, now())";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -29,12 +30,12 @@ public class CsatRepositoryImpl implements CsatRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getIdCode());
-            pstmt.setString(2, target.getName());
-            pstmt.setString(3, target.getSsn());
-            pstmt.setString(4, target.getAddress());
-            pstmt.setDate(5, Date.valueOf(target.getExamDate()));
-            pstmt.setString(6, target.getExamLoc());
+            pstmt.setString(1, target.getCsatIdCode());
+            pstmt.setString(2, target.getCsatName());
+            pstmt.setString(3, target.getCsatSsn());
+            pstmt.setString(4, target.getCsatAddress());
+            pstmt.setDate(5, Date.valueOf(target.getCsatExamDate()));
+            pstmt.setString(6, target.getCsatExamLoc());
 
             pstmt.executeUpdate();
 
@@ -65,14 +66,14 @@ public class CsatRepositoryImpl implements CsatRepository {
             while(rs.next()) {
                 Csat target = new Csat();
 
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getString("exam_date"));
-                target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setCsatIdCode(rs.getString("csat_id_code"));
+                target.setCsatName(rs.getString("csat_csat_name"));
+                target.setCsatSsn(rs.getString("ssn"));
+                target.setCsatAddress(rs.getString("csat_address"));
+                target.setCsatExamDate(rs.getString("csat_exam_date"));
+                target.setCsatExamLoc(rs.getString("csat_exam_loc"));
+                target.setCsatRgstDate(rs.getString("csat_register_date"));
+                target.setCsatUpdateDate(rs.getString("csat_update_date"));
 
                 targets.add(target);
             }
@@ -86,9 +87,9 @@ public class CsatRepositoryImpl implements CsatRepository {
     }
 
     @Override
-    public Optional<Csat> findByIdCode(String idCode) {
+    public Optional<Csat> findByIdCode(String csatIdCode) {
 
-        String sql = "select * from csat where id_code = ?";
+        String sql = "select * from csat where csat_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -97,20 +98,20 @@ public class CsatRepositoryImpl implements CsatRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, csatIdCode);
 
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 Csat target = new Csat();
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getString("exam_date"));
-                target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setCsatIdCode(rs.getString("csat_id_code"));
+                target.setCsatName(rs.getString("csat_name"));
+                target.setCsatSsn(rs.getString("csat_ssn"));
+                target.setCsatAddress(rs.getString("csat_address"));
+                target.setCsatExamDate(rs.getString("csat_exam_date"));
+                target.setCsatExamLoc(rs.getString("csat_exam_loc"));
+                target.setCsatRgstDate(rs.getString("csat_register_date"));
+                target.setCsatUpdateDate(rs.getString("csat_update_date"));
 
                 return Optional.of(target);
             } else {
@@ -125,10 +126,10 @@ public class CsatRepositoryImpl implements CsatRepository {
     }
 
     @Override
-    public String findName(String idCode) {
+    public String findName(String csatIdCode) {
 
         StringBuilder sb = new StringBuilder();
-        String sql = "select name from csat where id_code = ?";
+        String sql = "select name from csat where csat_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -138,11 +139,11 @@ public class CsatRepositoryImpl implements CsatRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, csatIdCode);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                sb.append(rs.getString("name"));
+                sb.append(rs.getString("csat_name"));
             }
 
             return String.valueOf(sb);
@@ -156,7 +157,8 @@ public class CsatRepositoryImpl implements CsatRepository {
     @Override
     public Csat update(Csat target) {
 
-        String sql = "update csat set name = ?, ssn = ?, address = ?, exam_date = ?, exam_loc = ?, update_date = now() where id_code = ?";
+        String sql = "update csat set csat_name = ?, csat_ssn = ?, csat_address = ?, " +
+                "csat_exam_date = ?, csat_exam_loc = ?, csat_update_date = now() where csat_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -166,12 +168,12 @@ public class CsatRepositoryImpl implements CsatRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getName());
-            pstmt.setString(2, target.getSsn());
-            pstmt.setString(3, target.getAddress());
-            pstmt.setDate(4, Date.valueOf(target.getExamDate()));
-            pstmt.setString(5, target.getExamLoc());
-            pstmt.setString(6, target.getIdCode());
+            pstmt.setString(1, target.getCsatName());
+            pstmt.setString(2, target.getCsatSsn());
+            pstmt.setString(3, target.getCsatAddress());
+            pstmt.setDate(4, Date.valueOf(target.getCsatExamDate()));
+            pstmt.setString(5, target.getCsatExamLoc());
+            pstmt.setString(6, target.getCsatIdCode());
 
             pstmt.executeUpdate();
 
@@ -184,9 +186,9 @@ public class CsatRepositoryImpl implements CsatRepository {
     }
 
     @Override
-    public void delete(String idCode) {
+    public void delete(String csatIdCode) {
 
-        String sql = "delete from csat where id_code = ?";
+        String sql = "delete from csat where csat_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -195,7 +197,7 @@ public class CsatRepositoryImpl implements CsatRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, csatIdCode);
             pstmt.execute();
 
         } catch (SQLException e) {

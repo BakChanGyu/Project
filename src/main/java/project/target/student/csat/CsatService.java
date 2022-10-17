@@ -52,7 +52,7 @@ public class CsatService {
     private Csat validateDuplicateMissing(Csat target) {
 
         return csatRepository.findAll().stream()
-                .filter(t -> t.getSsn().equals(target.getSsn()))
+                .filter(t -> t.getCsatSsn().equals(target.getCsatSsn()))
                 .findAny()
                 .orElse(null);
     }

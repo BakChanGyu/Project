@@ -3,7 +3,6 @@ package project.repository.target;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
-import project.target.student.csat.Csat;
 import project.target.student.toeic.Toeic;
 
 import javax.sql.DataSource;
@@ -20,7 +19,8 @@ public class ToeicRepositoryImpl implements ToeicRepository {
 
     @Override
     public Toeic save(Toeic target) {
-        String sql = "insert into toeic(id_code, name, ssn, address, exam_date, exam_loc, register_date) values(?, ?, ?, ?, ?, ?, now())";
+        String sql = "insert into toeic(toeic_id_code, toeic_name, toeic_ssn, toeic_address, toeic_exam_date, toeic_exam_loc, toeic_register_date)" +
+                " values(?, ?, ?, ?, ?, ?, now())";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -30,12 +30,12 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getIdCode());
-            pstmt.setString(2, target.getName());
-            pstmt.setString(3, target.getSsn());
-            pstmt.setString(4, target.getAddress());
-            pstmt.setDate(5, Date.valueOf(target.getExamDate()));
-            pstmt.setString(6, target.getExamLoc());
+            pstmt.setString(1, target.getToeicIdCode());
+            pstmt.setString(2, target.getToeicName());
+            pstmt.setString(3, target.getToeicSsn());
+            pstmt.setString(4, target.getToeicAddress());
+            pstmt.setDate(5, Date.valueOf(target.getToeicExamDate()));
+            pstmt.setString(6, target.getToeicExamLoc());
 
             pstmt.executeUpdate();
 
@@ -66,14 +66,14 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             while(rs.next()) {
                 Toeic target = new Toeic();
 
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getString("exam_date"));
-                target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setToeicIdCode(rs.getString("toeic_id_code"));
+                target.setToeicName(rs.getString("toeic_name"));
+                target.setToeicSsn(rs.getString("toeic_ssn"));
+                target.setToeicAddress(rs.getString("toeic_address"));
+                target.setToeicExamDate(rs.getString("toeic_exam_date"));
+                target.setToeicExamLoc(rs.getString("toeic_exam_loc"));
+                target.setToeicRgstDate(rs.getString("toeic_register_date"));
+                target.setToeicUpdateDate(rs.getString("toeic_update_date"));
 
                 targets.add(target);
             }
@@ -87,9 +87,9 @@ public class ToeicRepositoryImpl implements ToeicRepository {
     }
 
     @Override
-    public Optional<Toeic> findByIdCode(String idCode) {
+    public Optional<Toeic> findByIdCode(String toeicIdCode) {
 
-        String sql = "select * from toeic where id_code = ?";
+        String sql = "select * from toeic where toeic_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -98,20 +98,20 @@ public class ToeicRepositoryImpl implements ToeicRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, toeicIdCode);
 
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 Toeic target = new Toeic();
-                target.setIdCode(rs.getString("id_code"));
-                target.setName(rs.getString("name"));
-                target.setSsn(rs.getString("ssn"));
-                target.setAddress(rs.getString("address"));
-                target.setExamDate(rs.getString("exam_date"));
-                target.setExamLoc(rs.getString("exam_loc"));
-                target.setRgstDate(rs.getString("register_date"));
-                target.setUpdateDate(rs.getString("update_date"));
+                target.setToeicIdCode(rs.getString("toeic_id_code"));
+                target.setToeicName(rs.getString("toeic_name"));
+                target.setToeicSsn(rs.getString("toeic_ssn"));
+                target.setToeicAddress(rs.getString("toeic_address"));
+                target.setToeicExamDate(rs.getString("toeic_exam_date"));
+                target.setToeicExamLoc(rs.getString("toeic_exam_loc"));
+                target.setToeicRgstDate(rs.getString("toeic_register_date"));
+                target.setToeicUpdateDate(rs.getString("toeic_update_date"));
 
                 return Optional.of(target);
             } else {
@@ -126,10 +126,10 @@ public class ToeicRepositoryImpl implements ToeicRepository {
     }
 
     @Override
-    public String findName(String idCode) {
+    public String findName(String toeicIdCode) {
 
         StringBuilder sb = new StringBuilder();
-        String sql = "select name from toeic where id_code = ?";
+        String sql = "select name from toeic where toeic_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -139,11 +139,11 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, toeicIdCode);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                sb.append(rs.getString("name"));
+                sb.append(rs.getString("toeic_name"));
             }
 
             return String.valueOf(sb);
@@ -157,7 +157,8 @@ public class ToeicRepositoryImpl implements ToeicRepository {
     @Override
     public Toeic update(Toeic target) {
 
-        String sql = "update toeic set name = ?, ssn = ?, address = ?, exam_date = ?, exam_loc = ?, update_date = now() where id_code = ?";
+        String sql = "update toeic set toeic_name = ?, toeic_ssn = ?, toeic_address = ?, " +
+                "toeic_exam_date = ?, toeic_exam_loc = ?, toeic_update_date = now() where toeic_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -167,12 +168,12 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, target.getName());
-            pstmt.setString(2, target.getSsn());
-            pstmt.setString(3, target.getAddress());
-            pstmt.setDate(4, Date.valueOf(target.getExamDate()));
-            pstmt.setString(5, target.getExamLoc());
-            pstmt.setString(6, target.getIdCode());
+            pstmt.setString(1, target.getToeicName());
+            pstmt.setString(2, target.getToeicSsn());
+            pstmt.setString(3, target.getToeicAddress());
+            pstmt.setDate(4, Date.valueOf(target.getToeicExamDate()));
+            pstmt.setString(5, target.getToeicExamLoc());
+            pstmt.setString(6, target.getToeicIdCode());
 
             pstmt.executeUpdate();
 
@@ -185,9 +186,9 @@ public class ToeicRepositoryImpl implements ToeicRepository {
     }
 
     @Override
-    public void delete(String idCode) {
+    public void delete(String toeicIdCode) {
 
-        String sql = "delete from toeic where id_code = ?";
+        String sql = "delete from toeic where toeic_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -196,7 +197,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, idCode);
+            pstmt.setString(1, toeicIdCode);
             pstmt.execute();
 
         } catch (SQLException e) {

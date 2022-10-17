@@ -13,6 +13,7 @@ import java.util.UUID;
 @Component
 public class FileStore {
 
+    // 학습할 이미지가 저장될 장소
     @Value("${file.dir}")
     private String fileDir;
 
