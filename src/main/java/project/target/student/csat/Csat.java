@@ -19,7 +19,7 @@ public class Csat {
     private String csatExamDate; // 시험응시일자
     @NotEmpty
     private String csatExamLoc; // 시험응시장소
-    @NotEmpty
+
     private String csatRgstDate; // 등록일자 - 대상 등록시 서버에서 자동생성
 
     private String csatUpdateDate; // 수정일자 - 업데이트시 서버에서 자동생성

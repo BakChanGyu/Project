@@ -25,6 +25,7 @@ public class MissingController {
         log.info("missingDate ={}", target.getMissingDate());
         log.info("name ={}", target.getMissingName());
         log.info("address ={}", target.getMissingAddress());
+        log.info("protectorTel ={}", target.getProtectorTel());
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);

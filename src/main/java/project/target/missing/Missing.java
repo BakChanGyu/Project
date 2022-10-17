@@ -22,7 +22,7 @@ public class Missing {
     private String protectorName; // 보호자 성함
 
     private String protectorTel; // 보호자 연락처
-    @NotEmpty
+
     private String missingRgstDate; // 등록일자 - 실종자 등록시 서버에서 자동생성
 
     private String missingUpdateDate; // 수정일자 - 업데이트시 서버에서 자동생성
