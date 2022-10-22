@@ -15,7 +15,7 @@ public class EmailController {
     private final EmailService emailService;
 
     // 이메일로 보낸 인증코드가 일치하는지 확인하는 api
-    @GetMapping("/verify_code")
+    @GetMapping("/verify/code")
     public String verifyCode(@RequestParam Long memberId, String privateKey) {
         String serverKey = emailService.confirmEmail(memberId);
         log.info("serverKey ={}, userKey ={}", serverKey, privateKey);

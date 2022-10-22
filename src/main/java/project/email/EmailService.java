@@ -1,6 +1,7 @@
 package project.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import java.util.Random;
 
 @Service
 public class EmailService{
+
+    @Value("${email.url}")
+    String emailUrl;
 
     // Bean등록해둔 EmailConfig를 javaMailSender라는 이름으로 Autowired
     @Autowired
@@ -79,8 +83,8 @@ public class EmailService{
         msg += "<br>";
         msg += "<p>아래 인증 링크를 눌러 회원가입을 완료해주세요!<p>";
         msg += "<br>";
-        msg += "<a href='http://localhost:8080"
-                + "/api/verify_code?memberId=" + member.getMemberId()
+        msg += "<a href=" + emailUrl
+                + "/api/verify/code?memberId=" + member.getMemberId()
                 + "&privateKey=" + member.getPrivateKey()
                 + "'> 인증하기</a>";
         msg += "<br>";
