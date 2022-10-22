@@ -133,7 +133,7 @@ public class MissingRepositoryImpl implements MissingRepository {
     public String findName(String missingIdCode) {
 
         StringBuilder sb = new StringBuilder();
-        String sql = "select name from missing where missing_id_code = ?";
+        String sql = "select missing_name from missing where missing_id_code = ?";
 
         Connection conn = null;
         PreparedStatement pstmt = null;

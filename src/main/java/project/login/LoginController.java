@@ -6,11 +6,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.email.EmailService;
 import project.manager.Manager;
 import project.member.Member;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.UnsupportedEncodingException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -20,6 +24,7 @@ import java.util.Optional;
 public class LoginController {
 
     private final LoginService loginService;
+    private final EmailService emailService;
 
     @GetMapping("/login")
     public String loginForm(@ModelAttribute("loginForm") LoginForm form) { return "login/loginForm"; }
@@ -42,8 +47,8 @@ public class LoginController {
         // 인증코드 대조하여 "certified"면 로그인 허용
         Optional<Member> verifyCode = loginService.verifyCode(form.getLoginId());
         log.info("verifyCode ={}", verifyCode);
-        if (verifyCode == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        if (verifyCode.isEmpty()) {
+            return new ResponseEntity<>("error_code: 이메일 인증을 완료해주세요.", HttpStatus.OK);
         }
 
         // 세션이 있으면 반환, 없으면 신규 생성
@@ -55,7 +60,7 @@ public class LoginController {
         return new ResponseEntity<>(loginMember, HttpStatus.OK);
     }
 
-    @PostMapping("/manager_login")
+    @PostMapping("/manager/login")
     public ResponseEntity<?> managerLogin(@RequestBody Manager manager, BindingResult bindingResult,
                                           HttpServletRequest request) {
 
@@ -66,7 +71,6 @@ public class LoginController {
         // 로그인 성공 처리
         Manager loginManager = loginService.loginManager(manager.getManagerId(), manager.getManagerPwd());
         log.info("loginManager ={}", loginManager);
-        // TODO: session 줄지 말지 생각
 
         // 세션이 없으면 신규 생성
         HttpSession session = request.getSession(true);
@@ -91,7 +95,33 @@ public class LoginController {
         log.info("session ={}", session);
     }
 
+    @GetMapping("/login/find/id")
+    public ResponseEntity<?> findLoginId(@RequestParam Long memberId) {
 
+        String loginId = null;
+        try {
+            loginId = loginService.findLoginId(memberId);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>("error_code: 등록된 memberId 없음", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(loginId, HttpStatus.OK);
+    }
 
+    @GetMapping("/login/find/password")
+    public ResponseEntity<?> findPassword(@RequestParam String loginId) {
+
+        try {
+            Member member = loginService.findPassword(loginId);
+            emailService.sendPassword(member);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>("error_code: 등록된 loginId 없음", HttpStatus.OK);
+        } catch (MessagingException e) {
+            return new ResponseEntity<>("error_code: 메시지 오류 발생", HttpStatus.OK);
+        } catch (UnsupportedEncodingException e) {
+            return new ResponseEntity<>("error_code: 인코딩 오류 발생", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("이메일 발송 완료!", HttpStatus.OK);
+    }
 }
 

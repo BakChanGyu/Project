@@ -20,13 +20,22 @@ public class EmailController {
         String serverKey = emailService.confirmEmail(memberId);
         log.info("serverKey ={}, userKey ={}", serverKey, privateKey);
 
+        String message ="";
+        message += "<!DOCTYPE html><html><head><meta charset='utf-8'/>" +
+                "</head><body><script>";
+
         // 서버와 유저의 인증코드가 일치할 경우 DB에서 private_key값 certified로 변경
         if (serverKey.equals(privateKey)) {
             emailService.addPrivateKey(memberId);
-
-            return "인증에 성공했습니다!";
+            message +=
+                    "alert('인증에 성공했습니다!');</script>" +
+                    "</body></html>";
+            return message;
         } else {
-            return "인증에 실패했습니다. 다시 시도해주세요.";
+            message +=
+                    "alert('인증에 실패했습니다. 다시 시도해주세요.');</script>" +
+                    "</body></html>";
+            return message;
         }
     }
 }

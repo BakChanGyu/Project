@@ -25,7 +25,7 @@ public class DeleteFile {
 
         for (File file : files) {
             if (file.delete()) {
-                log.info("{} - 파일 삭제 완료", file);
+//                log.info("{} - 파일 삭제 완료", file);
             } else {
                 log.info("{} - 파일 삭제 실패", file);
                 return;

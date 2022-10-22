@@ -67,8 +67,8 @@ public class CsatRepositoryImpl implements CsatRepository {
                 Csat target = new Csat();
 
                 target.setCsatIdCode(rs.getString("csat_id_code"));
-                target.setCsatName(rs.getString("csat_csat_name"));
-                target.setCsatSsn(rs.getString("ssn"));
+                target.setCsatName(rs.getString("csat_name"));
+                target.setCsatSsn(rs.getString("csat_ssn"));
                 target.setCsatAddress(rs.getString("csat_address"));
                 target.setCsatExamDate(rs.getString("csat_exam_date"));
                 target.setCsatExamLoc(rs.getString("csat_exam_loc"));

@@ -14,7 +14,7 @@ import java.util.UUID;
 public class FileStore {
 
     // 학습할 이미지가 저장될 장소
-    @Value("${file.dir}")
+    @Value("${file.compare.dir}")
     private String fileDir;
 
     // 이미지 여러개 업로드시
@@ -32,7 +32,7 @@ public class FileStore {
     }
 
     // 파일 업로드
-    public UploadFile storeFile(MultipartFile multipartFile) throws IOException {
+    private UploadFile storeFile(MultipartFile multipartFile) throws IOException {
         if (multipartFile.isEmpty()) {
             return null;
         }

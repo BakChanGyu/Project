@@ -1,4 +1,4 @@
-package project.AI;
+package project.ai;
 
 import lombok.Data;
 

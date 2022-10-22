@@ -3,8 +3,6 @@ package project.email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import project.member.Member;
 import project.repository.member.MemberRepository;
@@ -39,7 +37,7 @@ public class EmailService{
         } catch (MailException e) {
             throw new IllegalArgumentException();
         } finally {
-            memberRepository.addPrivateKey(member.getMemberId(),emailPassword);
+            memberRepository.addPrivateKey(member.getMemberId(), emailPassword);
         }
     }
 
@@ -51,6 +49,17 @@ public class EmailService{
     // DB에 인증코드 업데이트
     public void addPrivateKey(Long memberId) {
         memberRepository.addPrivateKey(memberId, "certified");
+    }
+
+    // 가입시 사용한 메일로 비밀번호 보내줌.
+    public void sendPassword(Member member) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage findPwdMessage = createFindPwdMessage(member);
+
+        try {
+            javaMailSender.send(findPwdMessage);
+        } catch (MailException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     // 메일의 내용을 작성하는 메서드
@@ -74,6 +83,33 @@ public class EmailService{
                 + "/api/verify_code?memberId=" + member.getMemberId()
                 + "&privateKey=" + member.getPrivateKey()
                 + "'> 인증하기</a>";
+        msg += "<br>";
+        msg += "</div>";
+
+        message.setText(msg, "utf-8", "html");
+        message.setFrom(new InternetAddress("parkcg123123@gmail.com", "Admin"));
+
+        return message;
+    }
+
+    // 비밀번호 찾기 시 사용하는 메서드
+    private MimeMessage createFindPwdMessage(Member member) throws MessagingException, UnsupportedEncodingException {
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        // 이메일을 보내는 대상의 메일 주소
+        String to = member.getEmail();
+
+        message.addRecipients(Message.RecipientType.TO, to); // 보내는 대상
+        message.setSubject("비밀번호를 전송했습니다."); // 제목
+
+        String msg = "";
+        msg += "<div style='margin:100px;'>";
+        msg += "<h2> <strong>" + member.getMemberName() + "</strong> 님의 비밀번호입니다.</h2>";
+        msg += "<br>";
+        msg += "<p> 타인에게 유출되지 않도록 조심하세요.</p>";
+        msg += "<br>";
+        msg += "<strong>" + member.getPassword() +"</strong>";
         msg += "<br>";
         msg += "</div>";
 

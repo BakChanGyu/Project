@@ -7,6 +7,7 @@ import project.member.Member;
 import project.repository.manager.ManagerRepository;
 import project.repository.member.MemberRepository;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,19 @@ public class LoginService {
         return managerRepository.findById(id)
                 .filter(manager -> manager.getManagerPwd().equals(managerPwd))
                 .orElse(null);
+    }
+
+    // 아이디 찾기
+    public String findLoginId(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(NoSuchElementException::new);
+        return member.getLoginId();
+    }
+
+    // 비밀번호 찾기
+    public Member findPassword(String loginId) {
+        return memberRepository.findByLoginId(loginId)
+                .orElseThrow(NoSuchElementException::new);
+
     }
 }
