@@ -13,4 +13,6 @@ public interface CsatRepository {
     String findName(String csatIdCode);
     Csat update(Csat target);
     void delete(String csatIdCode);
+
+    void setIsUpdated(String csatIdCode);
 }

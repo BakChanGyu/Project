@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Regex {
 
     // 아이디 검사기
-    public boolean isloginId(String str) {
+    public boolean isLoginId(String str) {
         return Pattern.matches("^[a-zA-Z0-9]*$", str);
     }
     // 비밀번호 검사기 (최소 8자, 최소 하나의 문자 및 숫자)

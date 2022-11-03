@@ -16,7 +16,7 @@ public class ValidCheck {
     }
 
     public int memberInfo(Member member) {
-        if (!regex.isloginId(member.getLoginId())) {
+        if (!regex.isLoginId(member.getLoginId())) {
             return 1;
         } else if (!regex.isPassword(member.getPassword())) {
             return 2;

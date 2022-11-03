@@ -1,8 +1,11 @@
 package project.repository.target;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
+import project.target.missing.Missing;
 import project.target.student.csat.Csat;
 
 import javax.sql.DataSource;
@@ -50,7 +53,7 @@ public class CsatRepositoryImpl implements CsatRepository {
     @Override
     public List<Csat> findAll() {
 
-        String sql = "select * from csat";
+        String sql = "select * from csat order by csat_register_date DESC ";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -74,6 +77,7 @@ public class CsatRepositoryImpl implements CsatRepository {
                 target.setCsatExamLoc(rs.getString("csat_exam_loc"));
                 target.setCsatRgstDate(rs.getString("csat_register_date"));
                 target.setCsatUpdateDate(rs.getString("csat_update_date"));
+                target.setCsatIsUploaded(rs.getInt("csat_is_uploaded"));
 
                 targets.add(target);
             }
@@ -112,6 +116,7 @@ public class CsatRepositoryImpl implements CsatRepository {
                 target.setCsatExamLoc(rs.getString("csat_exam_loc"));
                 target.setCsatRgstDate(rs.getString("csat_register_date"));
                 target.setCsatUpdateDate(rs.getString("csat_update_date"));
+                target.setCsatIsUploaded(rs.getInt("csat_is_uploaded"));
 
                 return Optional.of(target);
             } else {
@@ -199,6 +204,29 @@ public class CsatRepositoryImpl implements CsatRepository {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, csatIdCode);
             pstmt.execute();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public void setIsUpdated(String csatIdCode) {
+
+        String sql = "update csat set csat_is_uploaded = 1 where csat_id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, csatIdCode);
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             throw new IllegalStateException(e);

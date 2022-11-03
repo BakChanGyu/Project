@@ -83,7 +83,7 @@ public class EmailService{
         msg += "<br>";
         msg += "<p>아래 인증 링크를 눌러 회원가입을 완료해주세요!<p>";
         msg += "<br>";
-        msg += "<a href=" + emailUrl
+        msg += "<a href='" + emailUrl
                 + "/api/verify/code?memberId=" + member.getMemberId()
                 + "&privateKey=" + member.getPrivateKey()
                 + "'> 인증하기</a>";

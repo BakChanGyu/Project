@@ -13,4 +13,5 @@ public interface MissingRepository {
     String findName(String missingIdCode);
     Missing update(Missing target);
     void delete(String missingIdCode);
+    void setIsUpdated(String missingIdCode);
 }

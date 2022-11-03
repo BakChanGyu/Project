@@ -50,7 +50,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
     @Override
     public List<Toeic> findAll() {
 
-        String sql = "select * from toeic";
+        String sql = "select * from toeic order by toeic_register_date DESC";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -74,6 +74,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
                 target.setToeicExamLoc(rs.getString("toeic_exam_loc"));
                 target.setToeicRgstDate(rs.getString("toeic_register_date"));
                 target.setToeicUpdateDate(rs.getString("toeic_update_date"));
+                target.setToeicIsUploaded(rs.getInt("toeic_is_uploaded"));
 
                 targets.add(target);
             }
@@ -112,6 +113,7 @@ public class ToeicRepositoryImpl implements ToeicRepository {
                 target.setToeicExamLoc(rs.getString("toeic_exam_loc"));
                 target.setToeicRgstDate(rs.getString("toeic_register_date"));
                 target.setToeicUpdateDate(rs.getString("toeic_update_date"));
+                target.setToeicIsUploaded(rs.getInt("toeic_is_uploaded"));
 
                 return Optional.of(target);
             } else {
@@ -199,6 +201,29 @@ public class ToeicRepositoryImpl implements ToeicRepository {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, toeicIdCode);
             pstmt.execute();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public void setIsUpdated(String toeicIdCode) {
+
+        String sql = "update toeic set toeic_is_uploaded = 1 where toeic_id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, toeicIdCode);
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             throw new IllegalStateException(e);

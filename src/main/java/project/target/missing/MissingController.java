@@ -2,16 +2,19 @@ package project.target.missing;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.file.DeleteFile;
 import project.file.ItemForm;
 import project.file.LearnFileStore;
 import project.file.UploadFile;
 import project.valid.ValidCheck;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -26,20 +29,27 @@ public class MissingController {
     private final LearnFileStore learnFileStore;
     private final ValidCheck validCheck;
 
+    @Value("${missing.learn.new.dir}")
+    private String path;
+
     // 실종자 등록 api
     @PostMapping("/missing/add")
     public ResponseEntity<?> add(@RequestBody Missing target, BindingResult bindingResult) {
-
+        log.info("들어온 데이터 ={}", target);
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);
-            return new ResponseEntity<>("error_code: 등록 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("등록 실패!", HttpStatus.BAD_REQUEST);
         }
 
-        String validAddTarget = validAddTarget(target);
-        if (!validAddTarget.equals("ok")) {
-            return new ResponseEntity<>("error_code: " + validAddTarget, HttpStatus.OK);
-        }
+//        try {
+//            String validAddTarget = validAddTarget(target);
+//            if (!validAddTarget.equals("ok")) {
+//                return new ResponseEntity<>("error_code: " + validAddTarget, HttpStatus.BAD_REQUEST);
+//            }
+//        } catch (NullPointerException e) {
+//            return new ResponseEntity<>("error_code: null값이 들어왔습니다!", HttpStatus.BAD_REQUEST);
+//        }
 
         try {
             // 난수 생성하여 idCode 주입
@@ -49,7 +59,7 @@ public class MissingController {
             missingService.save(target);
 
         } catch (IllegalStateException e) {
-            return new ResponseEntity<>("error_code: 실종자 정보가 중복되었습니다.", HttpStatus.OK);
+            return new ResponseEntity<>("실종자 정보가 중복되었습니다.", HttpStatus.BAD_REQUEST);
         }
 
         log.info("실종자 등록 완료 target ={}", target);
@@ -66,7 +76,7 @@ public class MissingController {
 
         // 리스트 조회 실패시, 에러반환
         if (missings == null) {
-            return new ResponseEntity<>("error_code: 조회 실패!",HttpStatus.OK);
+            return new ResponseEntity<>("조회 실패!", HttpStatus.BAD_REQUEST);
         }
 
         // 리스트 조회 성공시 listMember 반환
@@ -92,16 +102,34 @@ public class MissingController {
         missingService.update(target);
         log.info("실종자 정보 수정 완료");
 
-        return new ResponseEntity<>("success_code: 실종자 정보 수정 완료.", HttpStatus.OK);
+        return new ResponseEntity<>("실종자 정보 수정 완료.", HttpStatus.OK);
     }
 
     // 실종자 정보 삭제 api
     @GetMapping("/missing/delete/{missingIdCode}")
     public ResponseEntity<?> delete(@PathVariable String missingIdCode) {
+
+        // 대상 삭제 시, isUploaded = 1 인 경우 서버의 폴더도 삭제
+        Optional<Missing> missing = missingService.findOne(missingIdCode);
+        log.info("missing ={}", missing);
+        int isUploaded = missing.get().getMissingIsUploaded();
+        log.info("isUploaded ={}", isUploaded);
+        if (isUploaded == 1) {
+            try {
+                boolean result = delDir(path, missingIdCode);
+                if(!result) {
+                    return new ResponseEntity<>("파일 삭제 실패!", HttpStatus.BAD_REQUEST);
+                }
+                log.info("업로드된 필적 삭제 완료.");
+            } catch (IllegalAccessException e) {
+                return new ResponseEntity<>("파일 삭제 실패!", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         missingService.delete(missingIdCode);
         log.info("실종자 정보 삭제 완료");
 
-        return new ResponseEntity<>("success_code: 실종자 정보 삭제 완료.",HttpStatus.OK);
+        return new ResponseEntity<>("실종자 정보 삭제 완료.",HttpStatus.OK);
     }
 
     // 학습할 이미지 업로드
@@ -112,11 +140,11 @@ public class MissingController {
         // 서버에 이미지 저장
         List<UploadFile> storeImageFiles = learnFileStore.storeLearnFiles(form.getImageFiles(), missingIdCode, session);
         if (storeImageFiles == null) {
-            return new ResponseEntity<>("error_code: 이미지 저장 실패. 비회원입니다.", HttpStatus.OK);
+            return new ResponseEntity<>("이미지 저장 실패. 비회원입니다.", HttpStatus.BAD_REQUEST);
         }
         log.info("storedLearnImageFiles={}", storeImageFiles);
 
-        return new ResponseEntity<>("success_code: 이미지 저장 완료.", HttpStatus.OK);
+        return new ResponseEntity<>("이미지 저장 완료.", HttpStatus.OK);
     }
 
     private String validAddTarget(Missing target) {
@@ -138,5 +166,32 @@ public class MissingController {
         } else {
             return "ok";
         }
+    }
+
+    private boolean delDir(String path, String idCode) throws IllegalAccessException {
+        // 파일 clear
+        File targetFolder = new File(path);
+        File[] files = targetFolder.listFiles();
+        log.info("파일 리스트 ={}", (Object) files);
+
+        String fullPath = path + "/" + idCode;
+        log.info("fullPath ={}", fullPath);
+        for (File file : files) {
+            String absolutePath = file.getAbsolutePath();
+
+            if (absolutePath.equals(fullPath)) {
+                if(file.isDirectory()) {
+                    delDir(String.valueOf(file), idCode);
+                }
+                if(file.delete()) {
+                    log.info("{} - 파일 삭제 성공", file);
+                    return true;
+                } else {
+                    log.info("{} - 파일 삭제 실패", file);
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }

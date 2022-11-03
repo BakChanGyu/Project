@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import project.member.MemberService;
 
 @Slf4j
 @RestController
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class EmailController {
     private final EmailService emailService;
+    private final MemberService memberService;
 
     // 이메일로 보낸 인증코드가 일치하는지 확인하는 api
     @GetMapping("/verify/code")
@@ -32,8 +34,9 @@ public class EmailController {
                     "</body></html>";
             return message;
         } else {
+            memberService.deleteMember(memberId);
             message +=
-                    "alert('인증에 실패했습니다. 다시 시도해주세요.');</script>" +
+                    "alert('인증에 실패했습니다. 회원가입을 다시 해주세요.');</script>" +
                     "</body></html>";
             return message;
         }

@@ -84,12 +84,13 @@ public class LearnFileStore {
                 break;
             case "teacher":
                 targetName = "csat";
+                break;
             default:
                 targetName = "toeic";
         }
 
         // 해당 폴더 없을경우 생성
-        folderPath = fileDir + targetName + "/" + idCode;
+        folderPath = fileDir + "/" + targetName + "/imgcap/original/" + idCode;
         File Folder = new File(folderPath);
         if (!Folder.exists()) {
             Folder.mkdirs();

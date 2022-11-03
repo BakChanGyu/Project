@@ -48,7 +48,7 @@ public class LoginController {
         Optional<Member> verifyCode = loginService.verifyCode(form.getLoginId());
         log.info("verifyCode ={}", verifyCode);
         if (verifyCode.isEmpty()) {
-            return new ResponseEntity<>("error_code: 이메일 인증을 완료해주세요.", HttpStatus.OK);
+            return new ResponseEntity<>("error_code: 이메일 인증을 완료해주세요.", HttpStatus.BAD_REQUEST);
         }
 
         // 세션이 있으면 반환, 없으면 신규 생성
@@ -96,8 +96,9 @@ public class LoginController {
     }
 
     @GetMapping("/login/find/id")
-    public ResponseEntity<?> findLoginId(@RequestParam Long memberId) {
-
+    public ResponseEntity<?> findLoginId(@RequestBody Member member) {
+        Long memberId = member.getMemberId();
+        log.info("memberId ={}", memberId);
         String loginId = null;
         try {
             loginId = loginService.findLoginId(memberId);
@@ -108,11 +109,12 @@ public class LoginController {
     }
 
     @GetMapping("/login/find/password")
-    public ResponseEntity<?> findPassword(@RequestParam String loginId) {
-
+    public ResponseEntity<?> findPassword(@RequestBody Member member) {
+        String loginId = member.getLoginId();
+        log.info("loginId ={}", loginId);
         try {
-            Member member = loginService.findPassword(loginId);
-            emailService.sendPassword(member);
+            Member loginMember = loginService.findPassword(loginId);
+            emailService.sendPassword(loginMember);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>("error_code: 등록된 loginId 없음", HttpStatus.OK);
         } catch (MessagingException e) {

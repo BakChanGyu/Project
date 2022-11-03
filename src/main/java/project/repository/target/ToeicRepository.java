@@ -14,4 +14,6 @@ public interface ToeicRepository {
     String findName(String toeicIdCode);
     Toeic update(Toeic target);
     void delete(String toeicIdCode);
+
+    void setIsUpdated(String toeicIdCode);
 }

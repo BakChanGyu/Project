@@ -51,7 +51,7 @@ public class MissingRepositoryImpl implements MissingRepository {
     @Override
     public List<Missing> findAll() {
 
-        String sql = "select * from missing";
+        String sql = "select * from missing order by missing_register_date DESC";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -76,6 +76,7 @@ public class MissingRepositoryImpl implements MissingRepository {
                 target.setProtectorTel(rs.getString("protector_tel"));
                 target.setMissingRgstDate(rs.getString("missing_register_date"));
                 target.setMissingUpdateDate(rs.getString("missing_update_date"));
+                target.setMissingIsUploaded(rs.getInt("missing_is_uploaded"));
 
                 targets.add(target);
             }
@@ -116,6 +117,7 @@ public class MissingRepositoryImpl implements MissingRepository {
                 target.setProtectorTel(rs.getString("protector_tel"));
                 target.setMissingRgstDate(rs.getString("missing_register_date"));
                 target.setMissingUpdateDate(rs.getString("missing_update_date"));
+                target.setMissingIsUploaded(rs.getInt("missing_is_uploaded"));
 
                 return Optional.of(target);
             } else {
@@ -203,6 +205,29 @@ public class MissingRepositoryImpl implements MissingRepository {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, missingIdCode);
             pstmt.execute();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            close(conn, pstmt, rs);
+        }
+    }
+
+    @Override
+    public void setIsUpdated(String missingIdCode) {
+
+        String sql = "update missing set missing_is_uploaded = 1 where missing_id_code = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, missingIdCode);
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             throw new IllegalStateException(e);

@@ -23,4 +23,7 @@ public class Toeic {
     private String toeicRgstDate; // 등록일자 - 대상 등록시 서버에서 자동생성
 
     private String toeicUpdateDate; // 수정일자 - 업데이트시 서버에서 자동생성
+
+    private int toeicIsUploaded; // 필적 업로드 여부
+
 }

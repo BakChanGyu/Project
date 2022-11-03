@@ -1,5 +1,6 @@
 package project.file;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,23 +12,27 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class FileStore {
+@Slf4j
+public class ExcelFileStore {
 
-    // 학습할 이미지가 저장될 장소
-    @Value("${file.compare.dir}")
+    // 파일 저장장소
+    @Value("${excel.dir}")
     private String fileDir;
 
+    private String folderPath;
     // 이미지 여러개 업로드시
-    public List<UploadFile> storeFiles(List<MultipartFile> multipartFiles) throws IOException {
+    public List<UploadFile> storeFiles(List<MultipartFile> multipartFiles, String memberType) throws IOException {
         List<UploadFile> storeFileResult = new ArrayList<>();
-//        if (multipartFiles.size() != 100) {
-//            throw new IOException("100장의 이미지 파일을 올려주세요.");
-//        }
+        log.error("들어오는파일 ={}", multipartFiles);
+
+        createFolder(memberType);
+
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFile.isEmpty()) {
                 storeFileResult.add(storeFile(multipartFile));
             }
         }
+
         return storeFileResult;
     }
 
@@ -36,9 +41,6 @@ public class FileStore {
         if (multipartFile.isEmpty()) {
             return null;
         }
-
-        File dir = new File(fileDir);
-        dir.mkdirs();
 
         // 서버에 저장하는 파일명
         String originalFileName = multipartFile.getOriginalFilename();
@@ -64,6 +66,27 @@ public class FileStore {
 
     // 서버에 저장될 파일 경로 + 이름
     private String getFullPath(String filename) {
-        return fileDir + filename;
+        return folderPath + "/" + filename;
+    }
+
+    private void createFolder(String memberType) {
+        String targetName;
+
+        switch (memberType) {
+            case "police":
+                targetName = "missing";
+                break;
+            case "teacher":
+                targetName = "csat";
+            default:
+                targetName = "toeic";
+        }
+
+        // 해당 폴더 없을경우 생성
+        folderPath = fileDir + "/" + targetName + "/excel";
+        File Folder = new File(folderPath);
+        if (!Folder.exists()) {
+            Folder.mkdirs();
+        }
     }
 }

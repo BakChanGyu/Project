@@ -2,5 +2,7 @@ package project.ai.learn;
 
 public interface LearnAIService {
 
-    void requestToFlask();
+    String requestToFlask() throws IllegalAccessException;
+
+    void imgCap();
 }

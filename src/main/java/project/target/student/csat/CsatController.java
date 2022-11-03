@@ -2,12 +2,16 @@ package project.target.student.csat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.file.DeleteFile;
+import project.target.missing.Missing;
 import project.valid.ValidCheck;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +24,9 @@ public class CsatController {
     private final CsatService csatService;
     private final ValidCheck validCheck;
 
+    @Value("${csat.learn.new.dir}")
+    private String path;
+
     // 수능 응시자 등록 api
     @PostMapping("/csat/add")
     public ResponseEntity<?> add(@RequestBody Csat target, BindingResult bindingResult) {
@@ -28,13 +35,13 @@ public class CsatController {
         // 에러가 있는 경우 다시 회원가입 폼으로
         if (bindingResult.hasErrors()) {
             log.info("error ={}", bindingResult);
-            return new ResponseEntity<>("error_code: 등록 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("등록 실패!", HttpStatus.BAD_REQUEST);
         }
 
-        String validAddTarget = validAddTarget(target);
-        if (!validAddTarget.equals("ok")) {
-            return new ResponseEntity<>("error_code: " + validAddTarget, HttpStatus.OK);
-        }
+//        String validAddTarget = validAddTarget(target);
+//        if (!validAddTarget.equals("ok")) {
+//            return new ResponseEntity<>("error_code: " + validAddTarget, HttpStatus.BAD_REQUEST);
+//        }
 
         try {
             // 난수 생성하여 idCode 주입
@@ -44,7 +51,7 @@ public class CsatController {
             csatService.save(target);
 
         } catch (IllegalStateException e) {
-            return new ResponseEntity<>("error_code: 응시자 정보가 중복되었습니다.", HttpStatus.OK);
+            return new ResponseEntity<>("응시자 정보가 중복되었습니다.", HttpStatus.BAD_REQUEST);
         }
 
         log.info("수능 응시자 등록 완료 target ={}", target);
@@ -61,7 +68,7 @@ public class CsatController {
 
         // 리스트 조회 실패시, 에러반환
         if (csats == null) {
-            return new ResponseEntity<>("error_code: 조회 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("조회 실패!", HttpStatus.BAD_REQUEST);
         }
 
         // 리스트 조회 성공시 listMember 반환
@@ -87,16 +94,35 @@ public class CsatController {
         csatService.update(target);
         log.info("수능 응시자 정보 수정 완료");
 
-        return new ResponseEntity<>("success_code: 응시자 정보 수정 완료.", HttpStatus.OK);
+        return new ResponseEntity<>("응시자 정보 수정 완료.", HttpStatus.OK);
     }
 
     // 수능 응시자 정보 삭제 api
     @GetMapping("/csat/delete/{csatIdCode}")
     public ResponseEntity<?> delete(@PathVariable String csatIdCode) {
+
+
+        // 대상 삭제 시, isUploaded = 1 인 경우 서버의 폴더도 삭제
+        Optional<Csat> csat = csatService.findOne(csatIdCode);
+        log.info("csat ={}", csat);
+        int isUploaded = csat.get().getCsatIsUploaded();
+        log.info("isUploaded ={}", isUploaded);
+        if (isUploaded == 1) {
+            try {
+                boolean result = delDir(path, csatIdCode);
+                if(!result) {
+                    return new ResponseEntity<>("파일 삭제 실패!", HttpStatus.BAD_REQUEST);
+                }
+                log.info("업로드된 필적 삭제 완료.");
+            } catch (IllegalAccessException e) {
+                return new ResponseEntity<>("파일 삭제 실패!", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         csatService.delete(csatIdCode);
         log.info("수능 응시자 정보 삭제 완료");
 
-        return new ResponseEntity<>("success_code: 응시자 정보 수정 완료.", HttpStatus.OK);
+        return new ResponseEntity<>("응시자 정보 수정 완료.", HttpStatus.OK);
     }
 
     private String validAddTarget(Csat target) {
@@ -115,5 +141,32 @@ public class CsatController {
         } else {
             return "ok";
         }
+    }
+
+    private boolean delDir(String path, String idCode) throws IllegalAccessException {
+        // 파일 clear
+        File targetFolder = new File(path);
+        File[] files = targetFolder.listFiles();
+        log.info("파일 리스트 ={}", (Object) files);
+
+        String fullPath = path + "/" + idCode;
+
+        for (File file : files) {
+            String absolutePath = file.getAbsolutePath();
+
+            if (absolutePath.equals(fullPath)) {
+                if(file.isDirectory()) {
+                    delDir(String.valueOf(file), idCode);
+                }
+                if(file.delete()) {
+                    log.info("{} - 파일 삭제 성공", file);
+                    return true;
+                } else {
+                    log.info("{} - 파일 삭제 실패", file);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

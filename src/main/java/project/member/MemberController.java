@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import project.email.EmailService;
 import project.valid.ValidCheck;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,18 +31,19 @@ public class MemberController {
         // 에러가 있는 경우
         if (bindingResult.hasErrors()) {
             log.error("error ={}", bindingResult);
-            return new ResponseEntity<>("error_code: 회원가입 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("error_code: 회원가입 실패!", HttpStatus.BAD_REQUEST);
         }
 
-        String validAddMember = validAddMember(member);
-        if (!validAddMember.equals("ok")) {
-            return new ResponseEntity<>("error_code: " + validAddMember, HttpStatus.OK);
-        }
+//        String validAddMember = validAddMember(member);
+//        if (!validAddMember.equals("ok")) {
+//            return new ResponseEntity<>("error_code: " + validAddMember, HttpStatus.BAD_REQUEST);
+//        }
+        log.info("member={}", member);
 
         try {
             memberService.addMember(member);
         } catch (IllegalStateException e) {
-            return new ResponseEntity<>("error_code: memberID 또는 loginID가 중복입니다.", HttpStatus.OK);
+            return new ResponseEntity<>("error_code: memberID 또는 loginID가 중복입니다.", HttpStatus.BAD_REQUEST);
         }
 
         log.info("임시 회원가입 완료 member ={} ", member);
@@ -50,7 +52,7 @@ public class MemberController {
         try {
             emailService.sendSimpleMessage(member);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("error_code: 이메일 발송 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("error_code: 이메일 발송 실패!", HttpStatus.BAD_REQUEST);
         }
         log.info("인증코드 전송 완료");
 
@@ -63,7 +65,7 @@ public class MemberController {
 
         // 리스트 조회 실패시, 에러반환
         if (members == null) {
-            return new ResponseEntity<>("error_code: 조회 실패!", HttpStatus.OK);
+            return new ResponseEntity<>("error_code: 조회 실패!", HttpStatus.BAD_REQUEST);
         }
 
         // 리스트 조회 성공시, 리스트 반환

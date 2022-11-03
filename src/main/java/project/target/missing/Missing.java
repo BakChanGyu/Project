@@ -26,4 +26,7 @@ public class Missing {
     private String missingRgstDate; // 등록일자 - 실종자 등록시 서버에서 자동생성
 
     private String missingUpdateDate; // 수정일자 - 업데이트시 서버에서 자동생성
+
+    private int missingIsUploaded; // 필적 업로드 여부
+
 }
