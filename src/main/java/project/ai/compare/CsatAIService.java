@@ -81,8 +81,8 @@ public class CsatAIService implements AIService {
             jsonObject.addProperty("csatRgstDate", target.getCsatRgstDate());
             jsonObject.addProperty("csatUpdateDate", target.getCsatUpdateDate());
 
-            // 가장높은 확률이 80미만이라면 필적등록이 안 된 사람임을 알림
-            if (first.getValue() < 80) {
+            // 가장높은 확률이 68미만이라면 필적등록이 안 된 사람임을 알림
+            if (first.getValue() < 68) {
                 jsonObject.addProperty("matchable", "false");
             } else {
                 jsonObject.addProperty("matchable", "true");

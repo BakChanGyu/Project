@@ -48,4 +48,11 @@ public class LoginService {
                 .orElseThrow(NoSuchElementException::new);
 
     }
+
+    // 멤버타입가져오기
+    public String findMemberType(String loginId) {
+        Optional<Member> member = memberRepository.findByLoginId(loginId);
+
+        return member.get().getMemberType();
+    }
 }

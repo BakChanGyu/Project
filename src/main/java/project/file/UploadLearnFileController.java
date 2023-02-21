@@ -16,6 +16,7 @@ import project.repository.target.ToeicRepository;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Queue;
 
 @Slf4j
 @RestController
@@ -30,6 +31,7 @@ public class UploadLearnFileController {
     private final MissingRepository missingRepository;
     private final ToeicLearnAIService toeicLearnAIService;
     private final ToeicRepository toeicRepository;
+    private final Queue<Member> queue;
 
 
     // 학습할 필적 업로드
@@ -110,19 +112,31 @@ public class UploadLearnFileController {
         log.info("session에 저장된 member ={}", loginMember);
         String memberType = loginMember.getMemberType();
 
-        String aiResult = null;
-        if (memberType.equals("police")) {
-            // 경찰 AI모델
-            aiResult = missingLearnAIService.requestToFlask();
-            return new ResponseEntity<>(aiResult, HttpStatus.OK);
-        } else if (memberType.equals("teacher")) {
-            // 수능 감독관
-            aiResult = csatLearnAIService.requestToFlask();
-            return new ResponseEntity<>(aiResult, HttpStatus.OK);
+        // 회원요청 들어올때 이미 모델을 사용하고있는 회원이 있을 경우 끝날때까지 대기
+        queue.add(loginMember);
+        Member member = queue.poll();
+
+        if (loginMember.equals(member)) {
+            if (queue.isEmpty()) {
+                queue.add(loginMember);
+                queue.poll();
+
+                String aiResult = null;
+                if (memberType.equals("police")) {
+                    // 경찰 AI모델
+                    aiResult = missingLearnAIService.requestToFlask();
+                    return new ResponseEntity<>(aiResult, HttpStatus.OK);
+                } else if (memberType.equals("teacher")) {
+                    // 수능 감독관
+                    aiResult = csatLearnAIService.requestToFlask();
+                    return new ResponseEntity<>(aiResult, HttpStatus.OK);
+                } else {
+                    // 토익 감독관
+                    aiResult = toeicLearnAIService.requestToFlask();
+                    return new ResponseEntity<>(aiResult, HttpStatus.OK);
+                }
         } else {
-            // 토익 감독관
-            aiResult = toeicLearnAIService.requestToFlask();
-            return new ResponseEntity<>(aiResult, HttpStatus.OK);
+                return new ResponseEntity<>("이미 모델을 학습중인 회원이 있습니다.", HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -29,8 +29,8 @@ public class LoginController {
     @GetMapping("/login")
     public String loginForm(@ModelAttribute("loginForm") LoginForm form) { return "login/loginForm"; }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginForm form, BindingResult bindingResult,
+    @PostMapping("/police/login")
+    public ResponseEntity<?> loginPolice(@RequestBody LoginForm form, BindingResult bindingResult,
                         HttpServletRequest request) {
         
         if (bindingResult.hasErrors()) {
@@ -44,11 +44,54 @@ public class LoginController {
         }
 
         // 로그인 성공 처리
+        // 로그인한 회원의 memberType이 police일 때만 로그인 허용
+        String memberType = loginService.findMemberType(form.getLoginId());
+        if (!memberType.equals("police")) {
+            return new ResponseEntity<>("경찰 회원만 로그인 할 수 있습니다!", HttpStatus.BAD_REQUEST);
+        }
+
         // 인증코드 대조하여 "certified"면 로그인 허용
         Optional<Member> verifyCode = loginService.verifyCode(form.getLoginId());
         log.info("verifyCode ={}", verifyCode);
         if (verifyCode.isEmpty()) {
-            return new ResponseEntity<>("error_code: 이메일 인증을 완료해주세요.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("이메일 인증을 완료해주세요.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 세션이 있으면 반환, 없으면 신규 생성
+        HttpSession session = request.getSession(true);
+        // 세션에 로그인 정보 보관
+        session.setAttribute("login-member", loginMember);
+        log.info("session ={}", session);
+
+        return new ResponseEntity<>(loginMember, HttpStatus.OK);
+    }
+
+    @PostMapping("/teacher/login")
+    public ResponseEntity<?> loginTeacher(@RequestBody LoginForm form, BindingResult bindingResult,
+                                         HttpServletRequest request) {
+
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult, HttpStatus.BAD_REQUEST);
+        }
+
+        Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
+        log.info("login? {}", loginMember);
+        if (loginMember == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        // 로그인 성공 처리
+        // 로그인한 회원의 memberType이 police일 때만 로그인 허용
+        String memberType = loginService.findMemberType(form.getLoginId());
+        if (memberType.equals("police")) {
+            return new ResponseEntity<>("감독관 회원만 로그인 할 수 있습니다!", HttpStatus.BAD_REQUEST);
+        }
+
+        // 인증코드 대조하여 "certified"면 로그인 허용
+        Optional<Member> verifyCode = loginService.verifyCode(form.getLoginId());
+        log.info("verifyCode ={}", verifyCode);
+        if (verifyCode.isEmpty()) {
+            return new ResponseEntity<>("이메일 인증을 완료해주세요.", HttpStatus.BAD_REQUEST);
         }
 
         // 세션이 있으면 반환, 없으면 신규 생성
@@ -103,7 +146,7 @@ public class LoginController {
         try {
             loginId = loginService.findLoginId(memberId);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>("error_code: 등록된 memberId 없음", HttpStatus.OK);
+            return new ResponseEntity<>("등록된 memberId 없음", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(loginId, HttpStatus.OK);
     }
@@ -116,11 +159,11 @@ public class LoginController {
             Member loginMember = loginService.findPassword(loginId);
             emailService.sendPassword(loginMember);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>("error_code: 등록된 loginId 없음", HttpStatus.OK);
+            return new ResponseEntity<>("등록된 loginId 없음", HttpStatus.BAD_REQUEST);
         } catch (MessagingException e) {
-            return new ResponseEntity<>("error_code: 메시지 오류 발생", HttpStatus.OK);
+            return new ResponseEntity<>("메시지 오류 발생", HttpStatus.BAD_REQUEST);
         } catch (UnsupportedEncodingException e) {
-            return new ResponseEntity<>("error_code: 인코딩 오류 발생", HttpStatus.OK);
+            return new ResponseEntity<>("인코딩 오류 발생", HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>("이메일 발송 완료!", HttpStatus.OK);
